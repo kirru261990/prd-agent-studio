@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRD Agent Studio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f0;
+      color: #1a1a1a;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 32px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid #e5e5e0;
+    }
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #444;
+      display: block;
+      margin-bottom: 8px;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+      outline: none;
+    }
+    textarea:focus {
+      border-color: #888;
+    }
+    button {
+      margin-top: 12px;
+      padding: 10px 24px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    button:hover { background: #333; }
+    button:disabled { background: #999; cursor: not-allowed; }
+    .response-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #e5e5e0;
+      display: none;
+    }
+    .response-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .response-body {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #1a1a1a;
+      white-space: pre-wrap;
+    }
+    .loading {
+      font-size: 14px;
+      color: #888;
+      display: none;
+      margin-top: 12px;
+    }
+    .tag {
+      display: inline-block;
+      background: #f0f0eb;
+      color: #444;
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>PRD Agent Studio</h1>
+    <p class="subtitle">Agentic PRD review — competitor research, CS readiness, RBI compliance</p>
+
+    <div class="card">
+      <label>Feature description</label>
+      <textarea id="feature-input" placeholder="Describe the feature you want to review. e.g. Allow HDFC credit card users to convert any transaction above Rs 5000 into EMI instantly from their mobile app"></textarea>
+      <button id="run-btn" onclick="runAgent()">Run competitor agent</button>
+      <p class="loading" id="loading">Thinking... this takes 5-10 seconds</p>
+    </div>
+
+    <div class="response-card" id="response-card">
+      <div class="tag" id="agent-tag">competitor agent</div>
+      <div class="response-label">Claude's analysis</div>
+      <div class="response-body" id="response-body"></div>
+    </div>
+  </div>
+
+  <script>
+    async function runAgent() {
+      const feature = document.getElementById('feature-input').value.trim();
+      if (!feature) {
+        alert('Please enter a feature description first.');
+        return;
+      }
+
+      const btn = document.getElementById('run-btn');
+      const loading = document.getElementById('loading');
+      const responseCard = document.getElementById('response-card');
+      const responseBody = document.getElementById('response-body');
+
+      btn.disabled = true;
+      loading.style.display = 'block';
+      responseCard.style.display = 'none';
+
+      try {
+        const res = await fetch('http://localhost:8000/competitor-agent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ feature_description: feature })
+        });
+
+        const data = await res.json();
+        responseBody.textContent = data.response;
+        responseCard.style.display = 'block';
+      } catch (err) {
+        responseBody.textContent = 'Error: could not reach the server. Make sure uvicorn is running.';
+        responseCard.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        loading.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
