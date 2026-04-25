@@ -111,9 +111,11 @@
     <p class="subtitle">Agentic PRD review — competitor research, CS readiness, RBI compliance</p>
 
     <div class="card">
-      <label>Feature description</label>
-      <textarea id="feature-input" placeholder="Describe the feature you want to review. e.g. Allow HDFC credit card users to convert any transaction above Rs 5000 into EMI instantly from their mobile app"></textarea>
-      <button id="run-btn" onclick="runAgent()">Run competitor agent</button>
+      <label>Feature name</label>
+        <textarea id="feature-name" rows="2" placeholder="e.g. Instant EMI conversion for transactions above Rs 5000"></textarea>
+        <label style="margin-top: 16px;">Detailed feature description</label>
+        <textarea id="feature-input" placeholder="Describe the feature in detail. Include: who uses it, what problem it solves, how it works step by step, any specific thresholds or rules, and which user segment it targets."></textarea>
+        <button id="run-btn" onclick="runAgent()">Run competitor agent</button>
       <p class="loading" id="loading">Thinking... this takes 5-10 seconds</p>
     </div>
 
@@ -126,39 +128,43 @@
 
   <script>
     async function runAgent() {
-      const feature = document.getElementById('feature-input').value.trim();
-      if (!feature) {
-        alert('Please enter a feature description first.');
+    const featureName = document.getElementById('feature-name').value.trim();
+    const feature = document.getElementById('feature-input').value.trim();
+    
+    if (!featureName || !feature) {
+        alert('Please enter both feature name and description.');
         return;
-      }
+    }
 
-      const btn = document.getElementById('run-btn');
-      const loading = document.getElementById('loading');
-      const responseCard = document.getElementById('response-card');
-      const responseBody = document.getElementById('response-body');
+    const btn = document.getElementById('run-btn');
+    const loading = document.getElementById('loading');
+    const responseCard = document.getElementById('response-card');
+    const responseBody = document.getElementById('response-body');
 
-      btn.disabled = true;
-      loading.style.display = 'block';
-      responseCard.style.display = 'none';
+    btn.disabled = true;
+    loading.style.display = 'block';
+    responseCard.style.display = 'none';
 
-      try {
+    try {
         const res = await fetch('http://localhost:8000/competitor-agent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ feature_description: feature })
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                feature_description: `Feature: ${featureName}\n\nDetailed description: ${feature}` 
+            })
         });
 
         const data = await res.json();
         responseBody.textContent = data.response;
         responseCard.style.display = 'block';
-      } catch (err) {
+    } catch (err) {
         responseBody.textContent = 'Error: could not reach the server. Make sure uvicorn is running.';
         responseCard.style.display = 'block';
-      } finally {
+    } finally {
         btn.disabled = false;
         loading.style.display = 'none';
-      }
     }
+}
   </script>
 </body>
 </html>
