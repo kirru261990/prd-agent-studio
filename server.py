@@ -76,7 +76,7 @@ GLOBAL BEST PRACTICE RESULTS:
 
 Respond in exactly this structure:
 
-COMPETITORS (max 3):
+COMPETITORS (max 5):
 For each competitor:
 - Bank name | Specific product/app name
 - Why relevant: (1 sentence only)
