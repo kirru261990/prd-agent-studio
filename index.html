@@ -12,50 +12,54 @@
       color: #1a1a1a;
       padding: 40px 20px;
     }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    h1 {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-    .subtitle {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 32px;
-    }
+    .container { max-width: 860px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #888; margin-bottom: 32px; }
+
     .card {
       background: white;
       border-radius: 12px;
       padding: 24px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       border: 1px solid #e5e5e0;
     }
+
+    .step-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin-bottom: 16px;
+    }
+
     label {
       font-size: 13px;
       font-weight: 500;
       color: #444;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      margin-top: 14px;
     }
-    textarea {
+
+    label:first-of-type { margin-top: 0; }
+
+    input[type="text"], textarea {
       width: 100%;
-      height: 100px;
-      padding: 12px;
+      padding: 10px 12px;
       border: 1px solid #ddd;
       border-radius: 8px;
       font-size: 14px;
       font-family: inherit;
-      resize: vertical;
       outline: none;
+      background: #fafafa;
     }
-    textarea:focus {
-      border-color: #888;
-    }
-    button {
-      margin-top: 12px;
+
+    input[type="text"]:focus, textarea:focus { border-color: #888; background: white; }
+    textarea { resize: vertical; }
+
+    .btn {
+      margin-top: 16px;
       padding: 10px 24px;
       background: #1a1a1a;
       color: white;
@@ -65,8 +69,61 @@
       font-weight: 500;
       cursor: pointer;
     }
-    button:hover { background: #333; }
-    button:disabled { background: #999; cursor: not-allowed; }
+
+    .btn:hover { background: #333; }
+    .btn:disabled { background: #bbb; cursor: not-allowed; }
+    .btn-secondary {
+      background: white;
+      color: #1a1a1a;
+      border: 1px solid #ddd;
+      margin-left: 8px;
+    }
+    .btn-secondary:hover { background: #f5f5f0; }
+
+    .question-card {
+      background: #f0f7ff;
+      border: 1px solid #c8e0ff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+
+    .question-text {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .q-counter {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      height: 3px;
+      background: #e5e5e0;
+      border-radius: 2px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #1a1a1a;
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    .loading {
+      font-size: 13px;
+      color: #888;
+      margin-top: 12px;
+      display: none;
+    }
+
     .response-card {
       background: white;
       border-radius: 12px;
@@ -74,97 +131,277 @@
       border: 1px solid #e5e5e0;
       display: none;
     }
+
     .response-label {
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: #888;
-      margin-bottom: 12px;
+      margin-bottom: 4px;
     }
+
+    .response-meta {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 16px;
+    }
+
     .response-body {
       font-size: 14px;
-      line-height: 1.7;
+      line-height: 1.8;
       color: #1a1a1a;
       white-space: pre-wrap;
     }
-    .loading {
-      font-size: 14px;
-      color: #888;
-      display: none;
-      margin-top: 12px;
-    }
+
     .tag {
       display: inline-block;
       background: #f0f0eb;
       color: #444;
-      font-size: 12px;
+      font-size: 11px;
+      font-weight: 500;
       padding: 3px 10px;
       border-radius: 20px;
-      margin-bottom: 14px;
+      margin-right: 6px;
+      margin-bottom: 12px;
     }
+
+    .tag.rbi { background: #fff0f0; color: #c00; }
+    .tag.saved { background: #f0fff4; color: #060; }
+
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>PRD Agent Studio</h1>
-    <p class="subtitle">Agentic PRD review — competitor research, CS readiness, RBI compliance</p>
 
-    <div class="card">
+    <h1>PRD Agent Studio</h1>
+    <p class="subtitle">Competitive intelligence for HDFC PIXEL Studio — powered by Claude</p>
+
+    <!-- STEP 1: Feature Input -->
+    <div class="card" id="step1-card">
+      <div class="step-label">Step 1 — Describe your feature</div>
+
       <label>Feature name</label>
-        <textarea id="feature-name" rows="2" placeholder="e.g. Instant EMI conversion for transactions above Rs 5000"></textarea>
-        <label style="margin-top: 16px;">Detailed feature description</label>
-        <textarea id="feature-input" placeholder="Describe the feature in detail. Include: who uses it, what problem it solves, how it works step by step, any specific thresholds or rules, and which user segment it targets."></textarea>
-        <button id="run-btn" onclick="runAgent()">Run competitor agent</button>
-      <p class="loading" id="loading">Thinking... this takes 5-10 seconds</p>
+      <input type="text" id="feature-name" placeholder="e.g. Instant card freeze and unfreeze"/>
+
+      <label>Feature description</label>
+      <textarea id="feature-input" rows="5"
+        placeholder="Describe the feature in detail — who uses it, what problem it solves, how it works, any thresholds or rules, target segment."></textarea>
+
+      <label>Competitors to check <span style="font-weight:400;color:#aaa">(optional — comma separated)</span></label>
+      <input type="text" id="competitors-input"
+        placeholder="e.g. OneCard, Scapia, Slice — leave blank for automatic discovery"/>
+
+      <br/>
+      <button class="btn" id="start-btn" onclick="startClarification()">
+        Start analysis →
+      </button>
+      <p class="loading" id="loading-1">Getting first question...</p>
     </div>
 
+    <!-- STEP 2: Clarifying Questions -->
+    <div id="step2-card" class="hidden">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+
+      <div class="question-card">
+        <div class="q-counter" id="q-counter">Question 1 of up to 5</div>
+        <div class="question-text" id="question-text"></div>
+        <textarea id="answer-input" rows="3" placeholder="Your answer..."></textarea>
+        <div>
+          <button class="btn" id="next-btn" onclick="submitAnswer()">Next →</button>
+          <button class="btn btn-secondary" onclick="skipToAnalysis()">Skip to analysis</button>
+        </div>
+        <p class="loading" id="loading-2">Thinking...</p>
+      </div>
+    </div>
+
+    <!-- STEP 3: Analysis Running -->
+    <div id="step3-card" class="hidden">
+      <div class="card">
+        <div class="step-label">Step 3 — Running competitive analysis</div>
+        <p class="loading" id="loading-3" style="display:block">
+          Searching competitors, community signal, and regulatory context... this takes 15-20 seconds.
+        </p>
+      </div>
+    </div>
+
+    <!-- STEP 4: Results -->
     <div class="response-card" id="response-card">
-      <div class="tag" id="agent-tag">competitor agent</div>
-      <div class="response-label">Claude's analysis</div>
+      <div id="response-tags"></div>
+      <div class="response-label">Competitive Intelligence Report</div>
+      <div class="response-meta" id="response-meta"></div>
       <div class="response-body" id="response-body"></div>
     </div>
+
   </div>
 
   <script>
-    async function runAgent() {
-    const featureName = document.getElementById('feature-name').value.trim();
-    const feature = document.getElementById('feature-input').value.trim();
-    
-    if (!featureName || !feature) {
-        alert('Please enter both feature name and description.');
-        return;
+    let qaHistory = [];
+    let currentQuestion = '';
+
+    function getInputs() {
+      return {
+        feature_name: document.getElementById('feature-name').value.trim(),
+        feature_description: document.getElementById('feature-input').value.trim(),
+        competitors: document.getElementById('competitors-input').value.trim()
+      };
     }
 
-    const btn = document.getElementById('run-btn');
-    const loading = document.getElementById('loading');
-    const responseCard = document.getElementById('response-card');
-    const responseBody = document.getElementById('response-body');
+    function validateStep1() {
+      const { feature_name, feature_description } = getInputs();
+      if (!feature_name || !feature_description) {
+        alert('Please fill in both feature name and description.');
+        return false;
+      }
+      return true;
+    }
 
-    btn.disabled = true;
-    loading.style.display = 'block';
-    responseCard.style.display = 'none';
+    async function startClarification() {
+      if (!validateStep1()) return;
 
-    try {
-        const res = await fetch('http://localhost:8000/competitor-agent', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                feature_description: `Feature: ${featureName}\n\nDetailed description: ${feature}` 
-            })
+      const btn = document.getElementById('start-btn');
+      const loading = document.getElementById('loading-1');
+      btn.disabled = true;
+      loading.style.display = 'block';
+
+      const inputs = getInputs();
+
+      try {
+        const res = await fetch('http://localhost:8000/clarify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...inputs, qa_history: [] })
         });
-
         const data = await res.json();
-        responseBody.textContent = data.response;
-        responseCard.style.display = 'block';
-    } catch (err) {
-        responseBody.textContent = 'Error: could not reach the server. Make sure uvicorn is running.';
-        responseCard.style.display = 'block';
-    } finally {
+
+        if (data.ready) {
+          await runAnalysis();
+        } else {
+          showQuestion(data.question, data.question_number);
+        }
+      } catch (err) {
+        alert('Error: could not reach server. Make sure uvicorn is running.');
+      } finally {
         btn.disabled = false;
         loading.style.display = 'none';
+      }
     }
-}
+
+    function showQuestion(question, questionNumber) {
+      currentQuestion = question;
+      document.getElementById('step1-card').style.opacity = '0.5';
+      document.getElementById('step2-card').classList.remove('hidden');
+      document.getElementById('question-text').textContent = question;
+      document.getElementById('q-counter').textContent =
+        `Question ${questionNumber} of up to 5`;
+      document.getElementById('progress-fill').style.width =
+        `${(questionNumber - 1) * 20}%`;
+      document.getElementById('answer-input').value = '';
+      document.getElementById('answer-input').focus();
+    }
+
+    async function submitAnswer() {
+      const answer = document.getElementById('answer-input').value.trim();
+      if (!answer) {
+        alert('Please provide an answer before continuing.');
+        return;
+      }
+
+      qaHistory.push({ question: currentQuestion, answer });
+
+      const btn = document.getElementById('next-btn');
+      const loading = document.getElementById('loading-2');
+      btn.disabled = true;
+      loading.style.display = 'block';
+
+      const inputs = getInputs();
+
+      try {
+        const res = await fetch('http://localhost:8000/clarify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...inputs, qa_history: qaHistory })
+        });
+        const data = await res.json();
+
+        if (data.ready) {
+          document.getElementById('step2-card').classList.add('hidden');
+          await runAnalysis();
+        } else {
+          showQuestion(data.question, data.question_number);
+        }
+      } catch (err) {
+        alert('Error reaching server.');
+      } finally {
+        btn.disabled = false;
+        loading.style.display = 'none';
+      }
+    }
+
+    async function skipToAnalysis() {
+      document.getElementById('step2-card').classList.add('hidden');
+      await runAnalysis();
+    }
+
+    async function runAnalysis() {
+      document.getElementById('step3-card').classList.remove('hidden');
+      window.scrollTo(0, document.body.scrollHeight);
+
+      const inputs = getInputs();
+
+      try {
+        const res = await fetch('http://localhost:8000/competitor-agent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...inputs, qa_history: qaHistory })
+        });
+        const data = await res.json();
+
+        document.getElementById('step3-card').classList.add('hidden');
+        showResults(data);
+      } catch (err) {
+        document.getElementById('step3-card').classList.add('hidden');
+        alert('Error running analysis. Check server logs.');
+      }
+    }
+
+    function showResults(data) {
+      const card = document.getElementById('response-card');
+      const tags = document.getElementById('response-tags');
+      const meta = document.getElementById('response-meta');
+      const body = document.getElementById('response-body');
+
+      tags.innerHTML = '';
+
+      const agentTag = document.createElement('span');
+      agentTag.className = 'tag';
+      agentTag.textContent = 'Competitor Agent';
+      tags.appendChild(agentTag);
+
+      if (data.rbi_triggered) {
+        const rbiTag = document.createElement('span');
+        rbiTag.className = 'tag rbi';
+        rbiTag.textContent = 'RBI Triggered';
+        tags.appendChild(rbiTag);
+      }
+
+      if (data.saved_to) {
+        const savedTag = document.createElement('span');
+        savedTag.className = 'tag saved';
+        savedTag.textContent = 'Saved locally';
+        tags.appendChild(savedTag);
+      }
+
+      meta.textContent =
+        `${data.sources_searched} sources searched · ${data.qa_history?.length || 0} clarifying questions · ${new Date().toLocaleTimeString()}`;
+
+      body.textContent = data.response;
+      card.style.display = 'block';
+      window.scrollTo(0, document.body.scrollHeight);
+    }
   </script>
 </body>
 </html>
