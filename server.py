@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -572,3 +573,56 @@ Reason: (2 sentences — what's good, what's missing)"""
     result["saved_to"] = saved_path
 
     return result
+
+# ============================================================
+# UNIFIED PRD REVIEW — runs competitor + CS agents in parallel
+# ============================================================
+
+class ReviewInput(BaseModel):
+    feature_name: str
+    feature_description: str
+    competitors: str = ""
+    qa_history: list = []
+
+
+@app.post("/review")
+def unified_review(input: ReviewInput):
+
+    review_input_dict = {
+        "feature_name": input.feature_name,
+        "feature_description": input.feature_description,
+        "competitors": input.competitors,
+        "qa_history": input.qa_history
+    }
+
+    def run_competitor():
+        return competitor_agent(AnalysisInput(**review_input_dict))
+
+    def run_cs():
+        return cs_agent(CSInput(**review_input_dict))
+
+    # Fire both agents in parallel
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        competitor_future = executor.submit(run_competitor)
+        cs_future = executor.submit(run_cs)
+
+        competitor_result = competitor_future.result()
+        cs_result = cs_future.result()
+
+    # Combine results
+    combined = {
+        "agent": "unified_review",
+        "feature_name": input.feature_name,
+        "timestamp": datetime.now().isoformat(),
+        "competitor_analysis": competitor_result,
+        "cs_analysis": cs_result,
+        "sources_searched": competitor_result.get("sources_searched", 0),
+        "rbi_triggered": competitor_result.get("rbi_triggered", False),
+        "qa_history": input.qa_history
+    }
+
+    # Save combined result
+    saved_path = save_analysis(input.feature_name + "_review", combined)
+    combined["saved_to"] = saved_path
+
+    return combined

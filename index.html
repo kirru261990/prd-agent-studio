@@ -55,7 +55,11 @@
       background: #fafafa;
     }
 
-    input[type="text"]:focus, textarea:focus { border-color: #888; background: white; }
+    input[type="text"]:focus, textarea:focus {
+      border-color: #888;
+      background: white;
+    }
+
     textarea { resize: vertical; }
 
     .btn {
@@ -72,12 +76,14 @@
 
     .btn:hover { background: #333; }
     .btn:disabled { background: #bbb; cursor: not-allowed; }
+
     .btn-secondary {
       background: white;
       color: #1a1a1a;
       border: 1px solid #ddd;
       margin-left: 8px;
     }
+
     .btn-secondary:hover { background: #f5f5f0; }
 
     .question-card {
@@ -124,30 +130,28 @@
       display: none;
     }
 
-    .response-card {
+    .report-section {
       background: white;
       border-radius: 12px;
       padding: 24px;
       border: 1px solid #e5e5e0;
+      margin-bottom: 16px;
       display: none;
     }
 
-    .response-label {
-      font-size: 11px;
+    .report-title {
+      font-size: 16px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #888;
       margin-bottom: 4px;
     }
 
-    .response-meta {
+    .report-meta {
       font-size: 12px;
       color: #aaa;
       margin-bottom: 16px;
     }
 
-    .response-body {
+    .report-body {
       font-size: 14px;
       line-height: 1.8;
       color: #1a1a1a;
@@ -168,45 +172,66 @@
 
     .tag.rbi { background: #fff0f0; color: #c00; }
     .tag.saved { background: #f0fff4; color: #060; }
+    .tag.cs { background: #f0f0ff; color: #339; }
+    .tag.competitor { background: #fff8f0; color: #930; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e5e5e0;
+      margin: 24px 0;
+    }
 
     .hidden { display: none; }
+
+    .agents-running {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .agent-pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: #f0f0eb;
+      color: #888;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
 
     <h1>PRD Agent Studio</h1>
-    <p class="subtitle">PRD review for HDFC PIXEL Studio — powered by Claude</p>
-
-    <div style="display:flex; gap:10px; margin-bottom:24px;">
-    <button class="btn" id="tab-competitor" onclick="switchAgent('competitor')" 
-    style="background:#1a1a1a;">
-    Competitor Agent
-    </button>
-    <button class="btn" id="tab-cs" onclick="switchAgent('cs')" 
-    style="background:#888;">
-    CS Agent
-    </button>
-    </div>
+    <p class="subtitle">Full PRD review — competitive intelligence + CS impact, powered by Claude</p>
 
     <!-- STEP 1: Feature Input -->
     <div class="card" id="step1-card">
       <div class="step-label">Step 1 — Describe your feature</div>
 
       <label>Feature name</label>
-      <input type="text" id="feature-name" placeholder="e.g. Instant card freeze and unfreeze"/>
+      <input type="text" id="feature-name"
+        placeholder="e.g. Credit balance refund to bank account"/>
 
       <label>Feature description</label>
       <textarea id="feature-input" rows="5"
         placeholder="Describe the feature in detail — who uses it, what problem it solves, how it works, any thresholds or rules, target segment."></textarea>
 
-      <label>Competitors to check <span style="font-weight:400;color:#aaa">(optional — comma separated)</span></label>
+      <label>Competitors to check
+        <span style="font-weight:400;color:#aaa">(optional — comma separated)</span>
+      </label>
       <input type="text" id="competitors-input"
         placeholder="e.g. OneCard, Scapia, Slice — leave blank for automatic discovery"/>
 
       <br/>
       <button class="btn" id="start-btn" onclick="startClarification()">
-        Start analysis →
+        Start PRD review →
       </button>
       <p class="loading" id="loading-1">Getting first question...</p>
     </div>
@@ -218,54 +243,57 @@
       </div>
 
       <div class="question-card">
-        <div class="q-counter" id="q-counter">Question 1 of up to 5</div>
+        <div class="q-counter" id="q-counter">Question 1 of up to 3</div>
         <div class="question-text" id="question-text"></div>
-        <textarea id="answer-input" rows="3" placeholder="Your answer..."></textarea>
+        <textarea id="answer-input" rows="3"
+          placeholder="Your answer..."></textarea>
         <div>
-          <button class="btn" id="next-btn" onclick="submitAnswer()">Next →</button>
-          <button class="btn btn-secondary" onclick="skipToAnalysis()">Skip to analysis</button>
+          <button class="btn" id="next-btn" onclick="submitAnswer()">
+            Next →
+          </button>
+          <button class="btn btn-secondary" onclick="skipToAnalysis()">
+            Skip to review
+          </button>
         </div>
         <p class="loading" id="loading-2">Thinking...</p>
       </div>
     </div>
 
-    <!-- STEP 3: Analysis Running -->
+    <!-- STEP 3: Agents Running -->
     <div id="step3-card" class="hidden">
       <div class="card">
-        <div class="step-label">Step 3 — Running competitive analysis</div>
-        <p class="loading" id="loading-3" style="display:block">
-          Searching competitors, community signal, and regulatory context... this takes 15-20 seconds.
+        <div class="step-label">Running full PRD review</div>
+        <p style="font-size:13px;color:#666;">
+          Both agents are running in parallel. This takes 20-30 seconds.
         </p>
+        <div class="agents-running">
+          <div class="agent-pill">🔍 Competitor Agent</div>
+          <div class="agent-pill">💬 CS Impact Agent</div>
+        </div>
       </div>
     </div>
 
-    <!-- STEP 4: Results -->
-    <div class="response-card" id="response-card">
-      <div id="response-tags"></div>
-      <div class="response-label">Competitive Intelligence Report</div>
-      <div class="response-meta" id="response-meta"></div>
-      <div class="response-body" id="response-body"></div>
+    <!-- STEP 4: Results — Competitor Section -->
+    <div class="report-section" id="competitor-section">
+      <div id="competitor-tags"></div>
+      <div class="report-title">Competitive Intelligence</div>
+      <div class="report-meta" id="competitor-meta"></div>
+      <div class="report-body" id="competitor-body"></div>
+    </div>
+
+    <hr class="divider" id="report-divider" style="display:none"/>
+
+    <!-- STEP 5: Results — CS Section -->
+    <div class="report-section" id="cs-section">
+      <div id="cs-tags"></div>
+      <div class="report-title">CS Impact Analysis</div>
+      <div class="report-meta" id="cs-meta"></div>
+      <div class="report-body" id="cs-body"></div>
     </div>
 
   </div>
 
   <script>
-    let currentAgent = 'competitor';
-
-    function switchAgent(agent) {
-   currentAgent = agent;
-   document.getElementById('tab-competitor').style.background = 
-    agent === 'competitor' ? '#1a1a1a' : '#888';
-    document.getElementById('tab-cs').style.background = 
-    agent === 'cs' ? '#1a1a1a' : '#888';
-  
-    // Reset the form
-    qaHistory = [];
-    document.getElementById('step1-card').style.opacity = '1';
-    document.getElementById('step2-card').classList.add('hidden');
-    document.getElementById('step3-card').classList.add('hidden');
-    document.getElementById('response-card').style.display = 'none';
-    }  
     let qaHistory = [];
     let currentQuestion = '';
 
@@ -305,7 +333,7 @@
         const data = await res.json();
 
         if (data.ready) {
-          await runAnalysis();
+          await runReview();
         } else {
           showQuestion(data.question, data.question_number);
         }
@@ -323,9 +351,9 @@
       document.getElementById('step2-card').classList.remove('hidden');
       document.getElementById('question-text').textContent = question;
       document.getElementById('q-counter').textContent =
-        `Question ${questionNumber} of up to 5`;
+        `Question ${questionNumber} of up to 3`;
       document.getElementById('progress-fill').style.width =
-        `${(questionNumber - 1) * 20}%`;
+        `${(questionNumber - 1) * 33}%`;
       document.getElementById('answer-input').value = '';
       document.getElementById('answer-input').focus();
     }
@@ -356,7 +384,7 @@
 
         if (data.ready) {
           document.getElementById('step2-card').classList.add('hidden');
-          await runAnalysis();
+          await runReview();
         } else {
           showQuestion(data.question, data.question_number);
         }
@@ -370,68 +398,74 @@
 
     async function skipToAnalysis() {
       document.getElementById('step2-card').classList.add('hidden');
-      await runAnalysis();
+      await runReview();
     }
 
-    async function runAnalysis() {
-  document.getElementById('step3-card').classList.remove('hidden');
-  window.scrollTo(0, document.body.scrollHeight);
+    async function runReview() {
+      document.getElementById('step3-card').classList.remove('hidden');
+      window.scrollTo(0, document.body.scrollHeight);
 
-  const inputs = getInputs();
+      const inputs = getInputs();
 
-  const endpoint = currentAgent === 'cs'
-    ? 'http://localhost:8000/cs-agent'
-    : 'http://localhost:8000/competitor-agent';
+      try {
+        const res = await fetch('http://localhost:8000/review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...inputs, qa_history: qaHistory })
+        });
 
-    try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...inputs, qa_history: qaHistory })
-    });
-
-    const data = await res.json();
-    document.getElementById('step3-card').classList.add('hidden');
-    showResults(data);
-    } catch (err) {
-    document.getElementById('step3-card').classList.add('hidden');
-    alert('Error running analysis. Check server logs.');
+        const data = await res.json();
+        document.getElementById('step3-card').classList.add('hidden');
+        showResults(data);
+      } catch (err) {
+        document.getElementById('step3-card').classList.add('hidden');
+        alert('Error running review. Check server logs.');
+      }
     }
-  }
 
     function showResults(data) {
-      const card = document.getElementById('response-card');
-      const tags = document.getElementById('response-tags');
-      const meta = document.getElementById('response-meta');
-      const body = document.getElementById('response-body');
+      const competitorData = data.competitor_analysis;
+      const csData = data.cs_analysis;
 
-      tags.innerHTML = '';
+      // Competitor section
+      const compTags = document.getElementById('competitor-tags');
+      compTags.innerHTML = '';
+      addTag(compTags, 'Competitor Agent', 'competitor');
+      if (data.rbi_triggered) addTag(compTags, 'RBI Triggered', 'rbi');
+      if (data.saved_to) addTag(compTags, 'Saved locally', 'saved');
 
-      const agentTag = document.createElement('span');
-      agentTag.className = 'tag';
-      agentTag.textContent = 'Competitor Agent';
-      tags.appendChild(agentTag);
+      document.getElementById('competitor-meta').textContent =
+        `${data.sources_searched} sources searched · ` +
+        `${data.qa_history?.length || 0} clarifying questions · ` +
+        `${new Date().toLocaleTimeString()}`;
 
-      if (data.rbi_triggered) {
-        const rbiTag = document.createElement('span');
-        rbiTag.className = 'tag rbi';
-        rbiTag.textContent = 'RBI Triggered';
-        tags.appendChild(rbiTag);
-      }
+      document.getElementById('competitor-body').textContent =
+        competitorData.response;
+      document.getElementById('competitor-section').style.display = 'block';
 
-      if (data.saved_to) {
-        const savedTag = document.createElement('span');
-        savedTag.className = 'tag saved';
-        savedTag.textContent = 'Saved locally';
-        tags.appendChild(savedTag);
-      }
+      // Divider
+      document.getElementById('report-divider').style.display = 'block';
 
-      meta.textContent =
-        `${data.sources_searched} sources searched · ${data.qa_history?.length || 0} clarifying questions · ${new Date().toLocaleTimeString()}`;
+      // CS section
+      const csTags = document.getElementById('cs-tags');
+      csTags.innerHTML = '';
+      addTag(csTags, 'CS Impact Agent', 'cs');
+      if (csData.rbi_triggered) addTag(csTags, 'RBI Triggered', 'rbi');
 
-      body.textContent = data.response;
-      card.style.display = 'block';
+      document.getElementById('cs-meta').textContent =
+        `PRD: ${csData.prd_used} · ${new Date().toLocaleTimeString()}`;
+
+      document.getElementById('cs-body').textContent = csData.response;
+      document.getElementById('cs-section').style.display = 'block';
+
       window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function addTag(container, text, type) {
+      const tag = document.createElement('span');
+      tag.className = `tag ${type}`;
+      tag.textContent = text;
+      container.appendChild(tag);
     }
   </script>
 </body>
