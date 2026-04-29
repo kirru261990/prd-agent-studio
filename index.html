@@ -176,7 +176,18 @@
   <div class="container">
 
     <h1>PRD Agent Studio</h1>
-    <p class="subtitle">Competitive intelligence for HDFC PIXEL Studio — powered by Claude</p>
+    <p class="subtitle">PRD review for HDFC PIXEL Studio — powered by Claude</p>
+
+    <div style="display:flex; gap:10px; margin-bottom:24px;">
+    <button class="btn" id="tab-competitor" onclick="switchAgent('competitor')" 
+    style="background:#1a1a1a;">
+    Competitor Agent
+    </button>
+    <button class="btn" id="tab-cs" onclick="switchAgent('cs')" 
+    style="background:#888;">
+    CS Agent
+    </button>
+    </div>
 
     <!-- STEP 1: Feature Input -->
     <div class="card" id="step1-card">
@@ -239,6 +250,22 @@
   </div>
 
   <script>
+    let currentAgent = 'competitor';
+
+    function switchAgent(agent) {
+   currentAgent = agent;
+   document.getElementById('tab-competitor').style.background = 
+    agent === 'competitor' ? '#1a1a1a' : '#888';
+    document.getElementById('tab-cs').style.background = 
+    agent === 'cs' ? '#1a1a1a' : '#888';
+  
+    // Reset the form
+    qaHistory = [];
+    document.getElementById('step1-card').style.opacity = '1';
+    document.getElementById('step2-card').classList.add('hidden');
+    document.getElementById('step3-card').classList.add('hidden');
+    document.getElementById('response-card').style.display = 'none';
+    }  
     let qaHistory = [];
     let currentQuestion = '';
 
@@ -347,26 +374,30 @@
     }
 
     async function runAnalysis() {
-      document.getElementById('step3-card').classList.remove('hidden');
-      window.scrollTo(0, document.body.scrollHeight);
+  document.getElementById('step3-card').classList.remove('hidden');
+  window.scrollTo(0, document.body.scrollHeight);
 
-      const inputs = getInputs();
+  const inputs = getInputs();
 
-      try {
-        const res = await fetch('http://localhost:8000/competitor-agent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...inputs, qa_history: qaHistory })
-        });
-        const data = await res.json();
+  const endpoint = currentAgent === 'cs'
+    ? 'http://localhost:8000/cs-agent'
+    : 'http://localhost:8000/competitor-agent';
 
-        document.getElementById('step3-card').classList.add('hidden');
-        showResults(data);
-      } catch (err) {
-        document.getElementById('step3-card').classList.add('hidden');
-        alert('Error running analysis. Check server logs.');
-      }
+    try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...inputs, qa_history: qaHistory })
+    });
+
+    const data = await res.json();
+    document.getElementById('step3-card').classList.add('hidden');
+    showResults(data);
+    } catch (err) {
+    document.getElementById('step3-card').classList.add('hidden');
+    alert('Error running analysis. Check server logs.');
     }
+  }
 
     function showResults(data) {
       const card = document.getElementById('response-card');

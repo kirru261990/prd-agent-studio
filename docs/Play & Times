@@ -1,0 +1,53 @@
+apiVersion: rrsd.zetaapps.in/v1alpha1
+kind: RubySpendLimitPolicy
+metadata:
+  name: hdfc.ruby.rubyspendlimitpolicy.1003
+spec:
+  metadata:
+    id: ruby.rubyspendlimitpolicy.1003
+    name: 1003 Ruby Spend Limit Policies
+    description: 1003 Ruby Spend Limit Policies
+    requester:
+      module: ruby-module-e2e
+      moduleVersion: 0.0.1
+    tenantId: '1'
+    tenantCode: hdfc
+  validFrom: "2023-04-01T00:00:00.000Z"
+  validTill: "2999-12-31T00:00:00.000Z"
+  name: Spend Limit Policy 1003
+  description: Spend Limit Policy 1003
+  code: SPLIN001003
+  coaCode: COAIN00ZC01
+  disabledForNewCards:
+    - DOMESTIC_ECOM
+    - DOMESTIC_CONTACTLESS
+    - INTERNATIONAL_POS
+    - INTERNATIONAL_ECOM
+    - INTERNATIONAL_ATM
+    - INTERNATIONAL_CONTACTLESS
+  defaultLimitsForNewCards:
+    - category: DOMESTIC_ECOM
+      limitType: PERTRANSACTION
+      limitValue: '500000000'
+    - category: DOMESTIC_POS
+      limitType: PERTRANSACTION
+      limitValue: '500000000'
+    - category: DOMESTIC_ATM
+      limitType: PERTRANSACTION
+      limitValue: '500000000'
+    - category: DOMESTIC_CONTACTLESS
+      limitType: PERTRANSACTION
+      limitValue: '500000000'
+    - category: INTERNATIONAL_ECOM
+      limitType: PERTRANSACTION
+      limitValue: '500000000'
+    - category: INTERNATIONAL_POS
+      limitType: PERTRANSACTION
+      limitValue: '500000000'
+    - category: INTERNATIONAL_ATM
+      limitType: PERTRANSACTION
+      limitValue: '500000000'
+    - category: INTERNATIONAL_CONTACTLESS
+      limitType: PERTRANSACTION
+      limitValue: '500000000'
+  templateCode: india-credit

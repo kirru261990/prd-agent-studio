@@ -356,3 +356,219 @@ Reason: (1 sentence)"""
     result["saved_to"] = saved_path
 
     return result
+# ============================================================
+# CS AGENT
+# ============================================================
+
+class CSInput(BaseModel):
+    feature_name: str
+    feature_description: str
+    competitors: str = ""
+    qa_history: list = []
+
+
+def load_prd_context(feature_name: str) -> str:
+    """Find and extract most relevant PRD from /data/prds/ based on feature name."""
+    from docx import Document
+
+    prds_dir = Path("data/prds")
+    if not prds_dir.exists():
+        return "No PRDs found in data/prds directory."
+
+    # Find all docx files
+    prd_files = list(prds_dir.glob("*.docx"))
+    if not prd_files:
+        return "No PRD files found."
+
+    # Score each PRD by keyword match with feature name
+    feature_keywords = [w.lower() for w in feature_name.split()
+                        if len(w) > 3]
+
+    best_file = None
+    best_score = 0
+
+    for prd_file in prd_files:
+        filename_lower = prd_file.name.lower()
+        score = sum(1 for kw in feature_keywords if kw in filename_lower)
+        if score > best_score:
+            best_score = score
+            best_file = prd_file
+
+    # If no keyword match, use first PRD
+    if not best_file:
+        best_file = prd_files[0]
+
+    # Extract text from docx
+    try:
+        doc = Document(best_file)
+        text = "\n".join([p.text for p in doc.paragraphs if p.text.strip()])
+        return f"PRD: {best_file.name}\n\n{text[:4000]}"
+    except Exception as e:
+        return f"Could not read PRD: {str(e)}"
+
+
+@app.post("/cs-agent")
+def cs_agent(input: CSInput):
+
+    pixel_context = load_pixel_context()
+    qa_context = format_qa_history(input.qa_history)
+    enriched_description = f"{input.feature_description}\n{qa_context}"
+    feature_short = input.feature_name[:100]
+
+    # Load relevant PRD
+    prd_context = load_prd_context(input.feature_name)
+
+    # Detect RBI feature
+    is_rbi_feature = any(word in enriched_description.lower()
+                         for word in ['rbi', 'regulatory', 'compliance',
+                                      'guideline', 'circular', 'mandate',
+                                      'refund', 'bbps', 'autopay'])
+
+    # Search 1: Competitor CX handling
+    cx_results = tavily.search(
+        query=f"OneCard Scapia Slice {feature_short} customer support FAQ self-serve India",
+        max_results=3,
+        search_depth="basic"
+    )
+
+    # Search 2: Community signal — what users complain about
+    complaint_results = tavily.search(
+        query=f"reddit quora {feature_short} credit card India problem complaint support 2024",
+        max_results=3,
+        search_depth="basic"
+    )
+
+    # Search 3: Global CX best practice
+    global_cx_results = tavily.search(
+        query=f"best practice {feature_short} credit card customer support deflection self-serve",
+        max_results=2,
+        search_depth="basic"
+    )
+
+    # Format search results
+    cx_context = "\n\n".join([
+        f"Source: {r['url']}\n{r['content']}"
+        for r in cx_results.get('results', [])
+    ])
+
+    complaint_context = "\n\n".join([
+        f"Source: {r['url']}\n{r['content']}"
+        for r in complaint_results.get('results', [])
+    ])
+
+    global_cx_context = "\n\n".join([
+        f"Source: {r['url']}\n{r['content']}"
+        for r in global_cx_results.get('results', [])
+    ])
+
+    # RBI context if applicable
+    rbi_context = ""
+    if is_rbi_feature:
+        rbi_context = f"\nRBI REGULATORY CONTEXT:\n{extract_rbi_context(enriched_description)}"
+
+    # Build prompt
+    prompt = f"""You are a senior customer support strategist reviewing a PRD for HDFC PIXEL Studio.
+
+FEATURE NAME: {input.feature_name}
+FEATURE DESCRIPTION: {input.feature_description}
+{qa_context}
+
+PRD CONTENT:
+{prd_context}
+
+{rbi_context}
+
+COMPETITOR CX SEARCH RESULTS:
+{cx_context}
+
+USER COMPLAINT SIGNAL:
+{complaint_context}
+
+GLOBAL CX BEST PRACTICES:
+{global_cx_context}
+
+Your job is to identify every CS impact this feature will have and how to handle it.
+
+IMPORTANT RULES:
+- Be specific to this feature — no generic CS advice
+- Reference the PRD content where relevant
+- Flag gaps in the PRD that will cause CS problems
+- Use search results to benchmark competitor CX approaches
+
+Respond in exactly this structure:
+
+CONTACT DRIVERS:
+List every reason a user will contact CS because of this feature.
+For each:
+- Scenario: (what happened from user's perspective)
+- Likelihood: High / Medium / Low
+- PRD gap: (is this covered in the PRD? Yes / Partial / No)
+
+COMPETITOR CX BENCHMARK:
+For each high-likelihood contact driver:
+- How does the best competitor handle this? (specific, not generic)
+- Self-serve or agent-assisted?
+- What PIXEL should copy or improve on
+- Source URL
+
+FAQ COVERAGE:
+For each contact driver, write the FAQ:
+- Question: (exactly how a user would phrase it)
+- Answer: (what the CS agent should say — specific, actionable)
+- Escalation needed: Yes / No
+
+AGENT CENTRE REQUIREMENTS:
+What information must be visible to CS agents to resolve queries?
+List as bullet points. Flag any that are NOT currently in the PRD.
+
+ERROR SCREEN AUDIT:
+List every error state this feature introduces.
+For each:
+- Error scenario
+- Current PRD handling: (documented / not documented)
+- Recommended next action for user
+
+ESCALATION PATHS:
+Which scenarios cannot be resolved by tier-1 CS?
+For each:
+- Scenario
+- Who handles it (tier-2 / bank team / Zeta ops)
+- Expected resolution time
+
+TICKET DEFLECTION OPPORTUNITIES:
+What self-serve features would eliminate CS contact entirely?
+For each opportunity:
+- What to build
+- Estimated ticket reduction %
+- Complexity: Low / Medium / High
+
+OVERALL CS READINESS SCORE: X/10
+Reason: (2 sentences — what's good, what's missing)"""
+
+    message = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=3000,
+        system=[
+            {
+                "type": "text",
+                "text": f"You are a senior customer support strategist for HDFC PIXEL Studio. You review PRDs to identify CS impact, gaps, and deflection opportunities.\n\nPIXEL Studio context:\n{pixel_context}",
+                "cache_control": {"type": "ephemeral"}
+            }
+        ],
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    result = {
+        "agent": "cs",
+        "feature_name": input.feature_name,
+        "timestamp": datetime.now().isoformat(),
+        "prd_used": prd_context.split('\n')[0],
+        "rbi_triggered": is_rbi_feature,
+        "qa_history": input.qa_history,
+        "response": message.content[0].text
+    }
+
+    saved_path = save_analysis(input.feature_name + "_cs", result)
+    result["saved_to"] = saved_path
+
+    return result
