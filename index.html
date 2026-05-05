@@ -203,6 +203,101 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.4; }
     }
+
+.options-container {
+      margin-bottom: 16px;
+    }
+
+    .options-heading {
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 12px;
+      margin-top: 8px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .option-card {
+      background: white;
+      border: 1px solid #e5e5e0;
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .option-card:hover {
+      border-color: #888;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .option-card.selected {
+      border-color: #1a1a1a;
+      box-shadow: 0 0 0 2px #1a1a1a;
+    }
+
+    .option-card.recommended {
+      border-color: #c8e0ff;
+      background: #f8fbff;
+    }
+
+    .option-card.recommended.selected {
+      border-color: #1a1a1a;
+      box-shadow: 0 0 0 2px #1a1a1a;
+    }
+
+    .rec-badge {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #0066cc;
+      margin-bottom: 6px;
+    }
+
+    .option-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+    }
+
+    .option-summary {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .option-meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .option-tag {
+      font-size: 11px;
+      background: #f0f0eb;
+      color: #666;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .option-rationale {
+      font-size: 11px;
+      color: #888;
+      line-height: 1.4;
+      font-style: italic;
+    }
+
   </style>
 </head>
 <body>
@@ -291,11 +386,39 @@
       <div class="report-body" id="cs-body"></div>
     </div>
 
+    <!-- Options: Competitor -->
+    <div id="competitor-options" class="options-container"></div>
+
+    <!-- Options: CS -->  
+    <div id="cs-options" class="options-container"></div>
+
+    <!-- Generate PRD -->
+    <div id="generate-section" style="display:none;">
+      <div class="card">
+        <div class="step-label">Step 4 — Generate PRD</div>
+        <p style="font-size:13px;color:#666;margin-bottom:16px;">
+          Select one option from each agent above, then generate your PRD.
+        </p>
+        <button class="btn" id="generate-prd-btn" 
+          onclick="generatePRD()" disabled>
+          Select options to generate PRD (0/2 selected)
+        </button>
+      </div>
+    </div>
+
+    <!-- PRD Output -->
+    <div class="report-section" id="prd-section" style="display:none;">
+      <div class="report-title">Generated PRD</div>
+      <div class="report-meta">Generated from agent selections</div>
+      <div class="report-body" id="prd-body"></div>
+    </div>
+
   </div>
 
   <script>
     let qaHistory = [];
     let currentQuestion = '';
+    let selectedOptions = {};
 
     function getInputs() {
       return {
@@ -443,7 +566,11 @@
         competitorData.response;
       document.getElementById('competitor-section').style.display = 'block';
 
-      // Divider
+      // Render competitor options
+      if (competitorData.options && competitorData.options.choices) {
+        renderOptions('competitor-options', competitorData.options, 'differentiation');
+      }
+
       document.getElementById('report-divider').style.display = 'block';
 
       // CS section
@@ -458,6 +585,112 @@
       document.getElementById('cs-body').textContent = csData.response;
       document.getElementById('cs-section').style.display = 'block';
 
+      // Render CS options
+      if (csData.options && csData.options.choices) {
+        renderOptions('cs-options', csData.options, 'cs_strategy');
+      }
+
+      // Show generate PRD button
+      document.getElementById('generate-section').style.display = 'block';
+
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function renderOptions(containerId, optionsData, sectionKey) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      const heading = document.createElement('div');
+      heading.className = 'options-heading';
+      heading.textContent = sectionKey === 'differentiation'
+        ? 'Pick your differentiation angle for the PRD:'
+        : 'Pick your CS strategy for the PRD:';
+      container.appendChild(heading);
+
+      const grid = document.createElement('div');
+      grid.className = 'options-grid';
+
+      optionsData.choices.forEach((choice) => {
+        const card = document.createElement('div');
+        card.className = `option-card ${choice.recommended ? 'recommended' : ''}`;
+        card.id = `option-${sectionKey}-${choice.id}`;
+
+        card.innerHTML = `
+          ${choice.recommended ? '<div class="rec-badge">Recommended</div>' : ''}
+          <div class="option-title">${choice.title}</div>
+          <div class="option-summary">${choice.summary}</div>
+          <div class="option-meta">
+            <span class="option-tag">${choice.complexity} complexity</span>
+            ${choice.ticket_reduction
+              ? `<span class="option-tag">${choice.ticket_reduction} ticket reduction</span>`
+              : ''}
+          </div>
+          <div class="option-rationale">${choice.rationale}</div>
+        `;
+
+        card.onclick = () => selectOption(sectionKey, choice, card);
+        grid.appendChild(card);
+      });
+
+      container.appendChild(grid);
+    }
+
+    function selectOption(sectionKey, choice, cardElement) {
+      document.querySelectorAll(`[id^="option-${sectionKey}"]`).forEach(c => {
+        c.classList.remove('selected');
+      });
+      cardElement.classList.add('selected');
+      selectedOptions[sectionKey] = choice;
+      updateGenerateButton();
+    }
+
+    function updateGenerateButton() {
+      const btn = document.getElementById('generate-prd-btn');
+      const count = Object.keys(selectedOptions).length;
+      if (count === 2) {
+        btn.textContent = 'Generate PRD →';
+        btn.disabled = false;
+      } else {
+        btn.textContent = `Select options to generate PRD (${count}/2 selected)`;
+        btn.disabled = true;
+      }
+    }
+
+    async function generatePRD() {
+      const btn = document.getElementById('generate-prd-btn');
+      btn.disabled = true;
+      btn.textContent = 'Generating PRD... this takes 20-30 seconds';
+
+      const inputs = getInputs();
+
+      try {
+        const res = await fetch('http://localhost:8000/generate-prd', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            feature_name: inputs.feature_name,
+            feature_description: inputs.feature_description,
+            selected_options: selectedOptions,
+            qa_history: qaHistory
+          })
+        });
+
+        const data = await res.json();
+        showPRD(data);
+      } catch (err) {
+        alert('Error generating PRD. Check server logs.');
+        btn.disabled = false;
+        btn.textContent = 'Generate PRD →';
+      }
+    }
+
+    function showPRD(data) {
+      const section = document.getElementById('prd-section');
+      const body = document.getElementById('prd-body');
+      body.textContent = data.prd;
+      section.style.display = 'block';
       window.scrollTo(0, document.body.scrollHeight);
     }
 
@@ -468,5 +701,6 @@
       container.appendChild(tag);
     }
   </script>
+  
 </body>
 </html>
