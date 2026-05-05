@@ -32,7 +32,8 @@ app.mount("/ui", StaticFiles(directory=".", html=True), name="ui")
 RBI_DOCS = {
     "Credit Card FAQs": "data/rbi/MD - Credit card FAQs.pdf",
     "Credit Cards Master Direction": "data/rbi/MD - Credit cards.pdf",
-    "BBPS Guidelines": "data/rbi/MD - BBPS.pdf"
+    "BBPS Guidelines": "data/rbi/MD - BBPS.pdf",
+    "Credit Card Issuance Conduct 2022": "data/rbi/MD - Credit Card Issuance Conduct 2022.pdf"
 }
 
 # Input models
@@ -707,13 +708,23 @@ def unified_review(input: ReviewInput):
     def run_cs():
         return cs_agent(CSInput(**review_input_dict))
 
-    # Fire both agents in parallel
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    def run_compliance():
+        return compliance_agent(ComplianceInput(**review_input_dict))
+
+    def run_spec():
+        return spec_agent(SpecInput(**review_input_dict))
+
+    # Fire all four agents in parallel
+    with ThreadPoolExecutor(max_workers=4) as executor:
         competitor_future = executor.submit(run_competitor)
         cs_future = executor.submit(run_cs)
+        compliance_future = executor.submit(run_compliance)
+        spec_future = executor.submit(run_spec)
 
         competitor_result = competitor_future.result()
         cs_result = cs_future.result()
+        compliance_result = compliance_future.result()
+        spec_result = spec_future.result()
 
     # Combine results
     combined = {
@@ -722,6 +733,8 @@ def unified_review(input: ReviewInput):
         "timestamp": datetime.now().isoformat(),
         "competitor_analysis": competitor_result,
         "cs_analysis": cs_result,
+        "compliance_analysis": compliance_result,
+        "spec_analysis": spec_result,
         "sources_searched": competitor_result.get("sources_searched", 0),
         "rbi_triggered": competitor_result.get("rbi_triggered", False),
         "qa_history": input.qa_history
@@ -871,6 +884,399 @@ Be specific to Indian fintech, UPI, and RBI regulatory context. No generic plati
     }
 
     saved_path = save_analysis(input.feature_name + "_prd", result)
+    result["saved_to"] = saved_path
+
+    return result
+
+
+# ============================================================
+# COMPLIANCE AGENT
+# ============================================================
+
+class ComplianceInput(BaseModel):
+    feature_name: str
+    feature_description: str
+    qa_history: list = []
+
+
+def load_all_rbi_docs() -> str:
+    """Load all RBI PDFs and return combined text."""
+    all_text = []
+    for doc_name, doc_path in RBI_DOCS.items():
+        if not Path(doc_path).exists():
+            continue
+        doc = fitz.open(doc_path)
+        text = "\n".join([page.get_text() for page in doc])
+        all_text.append(f"=== {doc_name} ===\n{text}")
+    return "\n\n".join(all_text)
+
+
+def extract_relevant_rbi_sections(feature_description: str, full_rbi_text: str) -> str:
+    """Extract most relevant RBI sections using keyword matching."""
+    keywords = [w.lower() for w in feature_description.split()
+                if len(w) > 3 and w.lower() not in
+                ['this', 'that', 'with', 'from', 'they', 'their',
+                 'will', 'have', 'been', 'into', 'than', 'then',
+                 'when', 'what', 'hdfc', 'pixel', 'user', 'users']]
+
+    lines = full_rbi_text.split('\n')
+    relevant_chunks = []
+    seen = set()
+
+    for i, line in enumerate(lines):
+        if len(line.strip()) < 10:
+            continue
+        if any(kw in line.lower() for kw in keywords):
+            start = max(0, i - 3)
+            end = min(len(lines), i + 8)
+            chunk = "\n".join(lines[start:end])
+            if chunk not in seen:
+                seen.add(chunk)
+                relevant_chunks.append(chunk)
+
+    return "\n\n---\n\n".join(relevant_chunks[:15]) if relevant_chunks else \
+        "No specific RBI section found for this feature."
+
+
+@app.post("/compliance-agent")
+def compliance_agent(input: ComplianceInput):
+
+    pixel_context = load_pixel_context()
+    qa_context = format_qa_history(input.qa_history)
+    enriched_description = f"{input.feature_description}\n{qa_context}"
+
+    # Load all RBI docs
+    full_rbi_text = load_all_rbi_docs()
+    relevant_rbi = extract_relevant_rbi_sections(enriched_description, full_rbi_text)
+
+    # Search for additional regulatory context
+    feature_short = input.feature_name[:80]
+    reg_results = tavily.search(
+        query=f"RBI guidelines {feature_short} credit card India compliance 2024",
+        max_results=3,
+        search_depth="basic",
+        include_raw_content=True,
+        days=365
+    )
+
+    reg_context = "\n\n".join([
+        f"Source: {r['url']}\n{(r.get('raw_content') or r.get('content') or '')[:1500]}"
+        for r in reg_results.get('results', [])
+    ])
+
+    prompt = f"""You are a senior regulatory compliance analyst for HDFC PIXEL Studio credit card products in India.
+
+FEATURE: {input.feature_name}
+DESCRIPTION: {input.feature_description}
+{qa_context}
+
+Your job is to identify every RBI regulatory requirement relevant to this feature and produce a compliance checklist that the PM can use directly in the PRD.
+
+RBI MASTER DIRECTIONS AND CIRCULARS (relevant sections extracted):
+{relevant_rbi}
+
+ADDITIONAL REGULATORY SEARCH RESULTS:
+{reg_context}
+
+CRITICAL RULES:
+- Quote RBI text VERBATIM where found — use exact words, cite the document and clause
+- Never paraphrase RBI requirements — exact quotes only
+- If a requirement is NOT found in the documents, say "Not found in available circulars — legal review recommended"
+- Distinguish between MANDATORY requirements (shall/must) and ADVISORY (should/may)
+- Flag any compliance gaps that would block launch
+
+Respond in exactly this structure:
+
+APPLICABLE RBI REGULATIONS:
+For each relevant regulation found:
+- Clause reference: (document name + clause number if available)
+- Verbatim quote: (exact text from RBI document in quotes)
+- What it means for this feature: (1 sentence plain English interpretation)
+- Mandatory or Advisory: (Mandatory / Advisory)
+
+COMPLIANCE REQUIREMENTS FOR THIS FEATURE:
+List every specific thing PIXEL must build or ensure to comply:
+- Requirement: (what must be done)
+- Source: (which RBI clause)
+- Currently in PRD: (Yes / No / Unknown)
+- Risk if ignored: (Low / Medium / High — 1 sentence on consequence)
+
+COMPLIANCE GAPS:
+Features or scenarios not covered by available RBI documents:
+- Gap: (what's unclear)
+- Recommendation: (get legal opinion / check HDFC compliance team / low risk)
+
+LAUNCH BLOCKERS:
+List any compliance requirement that MUST be met before this feature can go live.
+If none: state "No mandatory compliance blockers identified in available documents."
+
+OVERALL COMPLIANCE RISK: Low / Medium / High
+Reason: (2 sentences)"""
+
+    message = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=3000,
+        temperature=0.0,
+        system=[
+            {
+                "type": "text",
+                "text": f"You are a senior regulatory compliance analyst for HDFC PIXEL Studio. You quote RBI regulations verbatim and never paraphrase regulatory requirements.\n\nPIXEL context:\n{pixel_context}",
+                "cache_control": {"type": "ephemeral"}
+            }
+        ],
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    response_text = message.content[0].text
+
+    result = {
+        "agent": "compliance",
+        "feature_name": input.feature_name,
+        "timestamp": datetime.now().isoformat(),
+        "rbi_sections_found": relevant_rbi != "No specific RBI section found for this feature.",
+        "response": response_text
+    }
+
+    saved_path = save_analysis(input.feature_name + "_compliance", result)
+    result["saved_to"] = saved_path
+
+    return result
+
+
+# ============================================================
+# SPEC AGENT — Use cases, acceptance criteria, metrics, instrumentation
+# ============================================================
+
+class SpecInput(BaseModel):
+    feature_name: str
+    feature_description: str
+    qa_history: list = []
+
+
+def load_relevant_sop(feature_name: str) -> str:
+    """Find and load the most relevant SOP from ops-sops folder."""
+    sops_dir = Path("data/internal/ops-sops")
+    if not sops_dir.exists():
+        return "No SOPs found."
+
+    feature_keywords = [w.lower() for w in feature_name.split()
+                   if len(w) > 3 and w.lower() not in
+                   ['pixel', 'play', 'credit', 'card', 'users', 'hdfc']]
+
+    sop_files = list(sops_dir.glob("*.docx")) + \
+                list(sops_dir.glob("*.doc"))
+
+    best_file = None
+    best_score = 0
+
+    for sop_file in sop_files:
+        filename_lower = sop_file.name.lower()
+        score = sum(1 for kw in feature_keywords if kw in filename_lower)
+        if score > best_score:
+            best_score = score
+            best_file = sop_file
+
+    if not best_file and sop_files:
+        # Try content-based matching on first 500 chars
+        for sop_file in sop_files:
+            try:
+                if sop_file.suffix == '.docx':
+                    from docx import Document
+                    doc = Document(sop_file)
+                    text = " ".join([p.text for p in doc.paragraphs
+                                    if p.text.strip()])[:500].lower()
+                    score = sum(1 for kw in feature_keywords if kw in text)
+                    if score > best_score:
+                        best_score = score
+                        best_file = sop_file
+            except Exception:
+                continue
+
+    if not best_file:
+        return "No relevant SOP found."
+
+    try:
+        if best_file.suffix == '.docx':
+            from docx import Document
+            doc = Document(best_file)
+            text = "\n".join([p.text for p in doc.paragraphs
+                             if p.text.strip()])
+            return f"SOP: {best_file.name}\n\n{text[:5000]}"
+        else:
+            return f"SOP found: {best_file.name} (format not supported for extraction)"
+    except Exception as e:
+        return f"Could not read SOP: {str(e)}"
+
+
+def load_instrumentation_reference() -> str:
+    """Load instrumentation reference from xlsx."""
+    import openpyxl
+    inst_path = Path("data/internal/instrumentation-reference.xlsx")
+    if not inst_path.exists():
+        return "Instrumentation reference not found."
+
+    try:
+        wb = openpyxl.load_workbook(inst_path)
+        all_text = []
+        for sheet in wb.sheetnames:
+            ws = wb[sheet]
+            sheet_text = [f"Sheet: {sheet}"]
+            for row in ws.iter_rows(values_only=True):
+                if any(cell is not None for cell in row):
+                    sheet_text.append(" | ".join(
+                        str(c) for c in row if c is not None
+                    ))
+            all_text.append("\n".join(sheet_text))
+        return "\n\n".join(all_text)[:4000]
+    except Exception as e:
+        return f"Could not read instrumentation reference: {str(e)}"
+
+
+@app.post("/spec-agent")
+def spec_agent(input: SpecInput):
+
+    pixel_context = load_pixel_context()
+    qa_context = format_qa_history(input.qa_history)
+    enriched_description = f"{input.feature_description}\n{qa_context}"
+    feature_short = input.feature_name[:80]
+
+    # Load relevant SOP
+    sop_context = load_relevant_sop(input.feature_name)
+
+    # Load instrumentation reference only if feature has UI/UX
+    has_ui = any(word in enriched_description.lower() for word in
+                 ['app', 'screen', 'button', 'ui', 'ux', 'user interface',
+                  'flow', 'page', 'view', 'tap', 'click', 'display', 'show'])
+    instrumentation_context = load_instrumentation_reference() if has_ui else \
+        "Not applicable — no UI/UX component detected for this feature."
+
+    # Load most relevant PRD
+    prd_context = load_prd_context(input.feature_name)
+
+    # Search for use case patterns
+    uc_results = tavily.search(
+        query=f"{feature_short} credit card India use cases edge cases 2024",
+        max_results=3,
+        search_depth="basic",
+        include_raw_content=True,
+        days=365
+    )
+
+    uc_context = "\n\n".join([
+        f"Source: {r['url']}\n{(r.get('raw_content') or r.get('content') or '')[:1500]}"
+        for r in uc_results.get('results', [])
+    ])
+
+    prompt = f"""You are a senior product analyst writing the specification section of a PRD for HDFC PIXEL Studio.
+
+FEATURE: {input.feature_name}
+DESCRIPTION: {input.feature_description}
+{qa_context}
+
+CURRENT STATE (from ops SOP):
+{sop_context}
+
+EXISTING PRD REFERENCE:
+{prd_context}
+
+INSTRUMENTATION REFERENCE:
+{instrumentation_context}
+
+EXTERNAL USE CASE RESEARCH:
+{uc_context}
+
+Your job is to produce a complete specification that covers sections 5, 6, 9, 11, and 12 of the PRD.
+
+Respond in exactly this structure:
+
+CURRENT STATE SUMMARY:
+How does this work today? What manual processes exist?
+2-3 sentences based on the SOP above.
+
+SCOPE:
+IN SCOPE (list only — no adjectives):
+- [specific feature or capability]
+
+OUT OF SCOPE (at least 3 items with reason):
+- [item] — [one line reason for exclusion]
+
+FUNCTIONAL USE CASES:
+For each use case (minimum 5, cover happy path + edge cases):
+
+Use Case [N]: [name]
+Actor: [who — primary user / CS agent / ops team / system]
+Precondition: [what must be true before this starts]
+User Story: As a [persona], I want [specific action] so that [measurable outcome]
+Steps:
+  1. [step]
+  2. [step]
+  3. [step]
+Acceptance Criteria:
+  - Given [context], when [action], then [expected result]
+  - Given [context], when [action], then [expected result]
+  - Given [context], when [action], then [expected result]
+Failure State AC:
+  - Given [error condition], when [action], then [user sees specific message/screen]
+Priority: P0 / P1 / P2
+
+NON-FUNCTIONAL USE CASES:
+Cover performance, security, accessibility, and reliability:
+- [NFR name]: [specific measurable requirement]
+  Acceptance: [how to verify this]
+
+METRICS IMPACT:
+Which existing PIXEL metrics does this feature affect?
+For each metric:
+- Metric name: [name]
+- Current baseline: [value or "unknown — check with analytics"]
+- Expected impact: [direction and magnitude]
+- Owner: [team]
+
+NEW METRICS TO TRACK:
+For each new metric this feature requires:
+- Metric name: [name]
+- Definition: [exactly what is measured]
+- Target: [goal]
+- Owner: [team]
+
+REPORTS & EXTRACTS IMPACT:
+- New reports needed: [list]
+- Existing reports affected: [list]
+- Reconciliation requirements: [what needs to balance against what]
+- Data extract requirements: [downstream teams needing data]
+
+INSTRUMENTATION REQUIREMENTS:
+Based on the instrumentation reference above, list every user event to track:
+- Event name: [follow naming convention from reference doc]
+- Trigger: [exactly when this fires]
+- Properties: [key-value pairs to capture]
+- Purpose: [what decision this informs]"""
+
+    message = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=4000,
+        temperature=0.0,
+        system=[
+            {
+                "type": "text",
+                "text": f"You are a senior product analyst for HDFC PIXEL Studio writing detailed PRD specifications with complete acceptance criteria for QA teams.\n\nPIXEL context:\n{pixel_context}",
+                "cache_control": {"type": "ephemeral"}
+            }
+        ],
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    response_text = message.content[0].text
+
+    result = {
+        "agent": "spec",
+        "feature_name": input.feature_name,
+        "timestamp": datetime.now().isoformat(),
+        "sop_used": sop_context.split('\n')[0],
+        "response": response_text
+    }
+
+    saved_path = save_analysis(input.feature_name + "_spec", result)
     result["saved_to"] = saved_path
 
     return result

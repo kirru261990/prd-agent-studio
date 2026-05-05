@@ -359,11 +359,13 @@
       <div class="card">
         <div class="step-label">Running full PRD review</div>
         <p style="font-size:13px;color:#666;">
-          Both agents are running in parallel. This takes 20-30 seconds.
+          Four agents running in parallel. This takes 30-45 seconds.
         </p>
         <div class="agents-running">
           <div class="agent-pill">🔍 Competitor Agent</div>
           <div class="agent-pill">💬 CS Impact Agent</div>
+          <div class="agent-pill">⚖️ Compliance Agent</div>
+          <div class="agent-pill">📋 Spec Agent</div>
         </div>
       </div>
     </div>
@@ -391,6 +393,22 @@
 
     <!-- Options: CS -->  
     <div id="cs-options" class="options-container"></div>
+
+    <!-- Compliance Section -->
+    <div class="report-section" id="compliance-section">
+      <div id="compliance-tags"></div>
+      <div class="report-title">Compliance & Regulatory Analysis</div>
+      <div class="report-meta" id="compliance-meta"></div>
+      <div class="report-body" id="compliance-body"></div>
+    </div>
+
+    <!-- Spec Section -->
+    <div class="report-section" id="spec-section">
+      <div id="spec-tags"></div>
+      <div class="report-title">Use Cases, Acceptance Criteria & Metrics</div>
+      <div class="report-meta" id="spec-meta"></div>
+      <div class="report-body" id="spec-body"></div>
+    </div>
 
     <!-- Generate PRD -->
     <div id="generate-section" style="display:none;">
@@ -588,6 +606,39 @@
       // Render CS options
       if (csData.options && csData.options.choices) {
         renderOptions('cs-options', csData.options, 'cs_strategy');
+      }
+
+      // Compliance section
+      const complianceData = data.compliance_analysis;
+      if (complianceData) {
+        const complianceTags = document.getElementById('compliance-tags');
+        complianceTags.innerHTML = '';
+        addTag(complianceTags, 'Compliance Agent', 'rbi');
+        if (complianceData.rbi_sections_found) {
+          addTag(complianceTags, 'RBI Sections Found', 'rbi');
+        }
+
+        document.getElementById('compliance-meta').textContent =
+          `RBI documents analysed · ${new Date().toLocaleTimeString()}`;
+
+        document.getElementById('compliance-body').textContent =
+          complianceData.response;
+        document.getElementById('compliance-section').style.display = 'block';
+      }
+
+      // Spec section
+      const specData = data.spec_analysis;
+      if (specData) {
+        const specTags = document.getElementById('spec-tags');
+        specTags.innerHTML = '';
+        addTag(specTags, 'Spec Agent', 'cs');
+        addTag(specTags, specData.sop_used?.replace('SOP: ', '') || 'SOP loaded', 'saved');
+
+        document.getElementById('spec-meta').textContent =
+          `Use cases + acceptance criteria + metrics · ${new Date().toLocaleTimeString()}`;
+
+        document.getElementById('spec-body').textContent = specData.response;
+        document.getElementById('spec-section').style.display = 'block';
       }
 
       // Show generate PRD button
