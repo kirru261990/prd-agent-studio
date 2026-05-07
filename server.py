@@ -600,8 +600,8 @@ IMPORTANT RULES:
 
 Respond in exactly this structure:
 
-CONTACT DRIVERS:
-List every reason a user will contact CS because of this feature.
+CONTACT DRIVERS (maximum 5, highest likelihood only):
+List the 5 most likely reasons a user will contact CS.
 For each:
 - Scenario: (what happened from user's perspective)
 - Likelihood: High / Medium / Low
@@ -614,8 +614,8 @@ For each high-likelihood contact driver:
 - What PIXEL should copy or improve on
 - Source URL
 
-FAQ COVERAGE:
-For each contact driver, write the FAQ:
+FAQ COVERAGE (maximum 5 only):
+For each contact driver write one FAQ:
 - Question: (exactly how a user would phrase it)
 - Answer: (what the CS agent should say — specific, actionable)
 - Escalation needed: Yes / No
@@ -1001,8 +1001,8 @@ List every specific thing PIXEL must build or ensure to comply:
 - Currently in PRD: (Yes / No / Unknown)
 - Risk if ignored: (Low / Medium / High — 1 sentence on consequence)
 
-COMPLIANCE GAPS:
-Features or scenarios not covered by available RBI documents:
+COMPLIANCE GAPS (maximum 5, most critical only):
+Top 5 gaps not covered by available RBI documents:
 - Gap: (what's unclear)
 - Recommendation: (get legal opinion / check HDFC compliance team / low risk)
 
@@ -1201,7 +1201,7 @@ OUT OF SCOPE (at least 3 items with reason):
 - [item] — [one line reason for exclusion]
 
 FUNCTIONAL USE CASES:
-For each use case (minimum 5, cover happy path + edge cases):
+EXACTLY 3 use cases only — one happy path, one edge case, one failure:
 
 Use Case [N]: [name]
 Actor: [who — primary user / CS agent / ops team / system]
@@ -1224,8 +1224,7 @@ Cover performance, security, accessibility, and reliability:
 - [NFR name]: [specific measurable requirement]
   Acceptance: [how to verify this]
 
-METRICS IMPACT:
-Which existing PIXEL metrics does this feature affect?
+METRICS IMPACT (maximum 3 most impacted metrics only):
 For each metric:
 - Metric name: [name]
 - Current baseline: [value or "unknown — check with analytics"]
@@ -1245,8 +1244,7 @@ REPORTS & EXTRACTS IMPACT:
 - Reconciliation requirements: [what needs to balance against what]
 - Data extract requirements: [downstream teams needing data]
 
-INSTRUMENTATION REQUIREMENTS:
-Based on the instrumentation reference above, list every user event to track:
+INSTRUMENTATION REQUIREMENTS (maximum 5 key events only):
 - Event name: [follow naming convention from reference doc]
 - Trigger: [exactly when this fires]
 - Properties: [key-value pairs to capture]
@@ -1280,3 +1278,194 @@ Based on the instrumentation reference above, list every user event to track:
     result["saved_to"] = saved_path
 
     return result
+
+# ============================================================
+# PRD GENERATOR FROM FORM
+# ============================================================
+
+class PRDFormInput(BaseModel):
+    problem_statement: str = ""
+    current_solution: str = ""
+    competitive_context: str = ""
+    rbi_requirements: str = ""
+    scope: str = ""
+    use_cases: str = ""
+    cs_impact: str = ""
+    ops_impact: str = ""
+    metrics: str = ""
+    rollout: str = ""
+    reports: str = ""
+    instrumentation: str = ""
+
+
+@app.post("/generate-prd-from-form")
+def generate_prd_from_form(input: PRDFormInput):
+
+    pixel_context = load_pixel_context()
+
+    prompt = f"""You are an Associate Director of Products at HDFC PIXEL Studio writing a production-grade PRD.
+
+The PM has filled in research and context across 12 sections. Your job is to synthesise this into a complete, well-structured PRD that a VP of Products would approve without sending back for revision.
+
+Use the PM's inputs as the foundation. Enrich where helpful. Never contradict what the PM has provided. If a section is empty, write "To be completed by PM" — do not invent content.
+
+INPUT FROM PM:
+
+1. PROBLEM STATEMENT:
+{input.problem_statement or "Not provided"}
+
+2. HOW BANK CURRENTLY SOLVES THIS:
+{input.current_solution or "Not provided"}
+
+3. COMPETITIVE CONTEXT:
+{input.competitive_context or "Not provided"}
+
+4. RBI & REGULATORY REQUIREMENTS:
+{input.rbi_requirements or "Not provided"}
+
+5. SCOPE:
+{input.scope or "Not provided"}
+
+6. FUNCTIONAL USE CASES & ACCEPTANCE CRITERIA:
+{input.use_cases or "Not provided"}
+
+7. CUSTOMER SUPPORT IMPACT:
+{input.cs_impact or "Not provided"}
+
+8. OPERATIONS IMPACT:
+{input.ops_impact or "Not provided"}
+
+9. SUCCESS METRICS:
+{input.metrics or "Not provided"}
+
+10. ROLLOUT STRATEGY:
+{input.rollout or "Not provided"}
+
+11. REPORTS & RECONCILIATION:
+{input.reports or "Not provided"}
+
+12. UX & INSTRUMENTATION:
+{input.instrumentation or "Not provided"}
+
+Now generate the complete PRD. Follow this exact structure:
+
+---
+PIXEL STUDIO — PRODUCT REQUIREMENTS DOCUMENT
+---
+
+1. STRATEGIC CONTEXT
+Why now? Opportunity cost of not building this in next 2 quarters.
+3 sentences maximum.
+
+2. PROBLEM STATEMENT
+Rewrite the PM's input in clean PRD language.
+User pain + current behaviour + business consequence.
+3 sentences maximum.
+
+3. CURRENT STATE
+How does this work today? What manual processes exist?
+
+4. COMPETITIVE CONTEXT & DIFFERENTIATION
+Synthesise the competitive research. What is PIXEL's chosen angle and why?
+
+5. REGULATORY REQUIREMENTS
+List all RBI requirements verbatim. Flag mandatory vs advisory.
+
+6. SCOPE
+In scope — feature list only, no adjectives.
+Out of scope — at least 3 items with one-line exclusion reason.
+
+7. USER STORIES & ACCEPTANCE CRITERIA
+Reproduce and clean up the PM's use cases.
+Ensure every story has:
+- Given/When/Then ACs
+- One failure state AC
+- Priority (P0/P1/P2)
+
+8. SUCCESS METRICS
+For each metric: name, baseline, target, timeframe, owner.
+Split: user metrics vs bank metrics.
+
+9. ROLLOUT STRATEGY
+MVP → V1 → V2.
+For each phase: what ships, rollout %, kill switch condition, success gate.
+
+10. CUSTOMER SUPPORT & OPERATIONS
+CS: new ticket types, SLAs, training needs, deflection strategy.
+Ops: manual touchpoints eliminated, new processes required.
+
+11. REPORTS & RECONCILIATION
+New reports, existing reports affected, reconciliation requirements, data extracts.
+
+12. UX & INSTRUMENTATION
+Key user flows. Events to instrument. Properties to capture.
+
+13. OPEN QUESTIONS
+Exactly 3. Format: Question → Why it matters → Who owns the answer.
+
+Be specific to Indian fintech, UPI, and RBI regulatory context.
+No generic platitudes. No filler."""
+
+    message = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=4000,
+        temperature=0.0,
+        system=f"You are an Associate Director of Products at HDFC PIXEL Studio writing production-grade PRDs for Indian fintech credit card products.\n\n{pixel_context}",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    result = {
+        "prd": message.content[0].text,
+        "timestamp": datetime.now().isoformat()
+    }
+
+    saved_path = save_analysis("prd_generated", result)
+    result["saved_to"] = saved_path
+
+    return result
+
+
+@app.post("/download-prd-docx")
+def download_prd_docx(data: dict):
+    from docx import Document
+    from docx.shared import Pt, RGBColor
+    from io import BytesIO
+    from fastapi.responses import StreamingResponse
+
+    prd_text = data.get("prd_text", "")
+
+    doc = Document()
+
+    style = doc.styles['Normal']
+    style.font.name = 'Arial'
+    style.font.size = Pt(11)
+
+    title = doc.add_heading('PIXEL Studio — Product Requirements Document', 0)
+    title.runs[0].font.color.rgb = RGBColor(0x1a, 0x1a, 0x1a)
+
+    for line in prd_text.split('\n'):
+        line = line.strip()
+        if not line:
+            doc.add_paragraph('')
+        elif line.startswith('# '):
+            doc.add_heading(line[2:], level=1)
+        elif line.startswith('## '):
+            doc.add_heading(line[3:], level=2)
+        elif line.startswith('### '):
+            doc.add_heading(line[4:], level=3)
+        elif line.startswith('- ') or line.startswith('* '):
+            doc.add_paragraph(line[2:], style='List Bullet')
+        elif line.startswith('---'):
+            doc.add_paragraph('─' * 50)
+        else:
+            doc.add_paragraph(line)
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+
+    return StreamingResponse(
+        buffer,
+        media_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        headers={'Content-Disposition': 'attachment; filename=PIXEL_PRD.docx'}
+    )

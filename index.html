@@ -10,17 +10,37 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #f5f5f0;
       color: #1a1a1a;
-      padding: 40px 20px;
+      padding: 32px 20px;
     }
     .container { max-width: 860px; margin: 0 auto; }
-    h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-    .subtitle { font-size: 13px; color: #888; margin-bottom: 32px; }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .top-bar h1 { font-size: 20px; font-weight: 600; }
+    .top-bar p { font-size: 13px; color: #888; margin-top: 2px; }
+
+    .open-prd-btn {
+      padding: 9px 20px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .open-prd-btn:hover { background: #333; }
 
     .card {
       background: white;
       border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 16px;
+      padding: 20px 24px;
+      margin-bottom: 14px;
       border: 1px solid #e5e5e0;
     }
 
@@ -30,7 +50,7 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: #888;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     label {
@@ -38,15 +58,14 @@
       font-weight: 500;
       color: #444;
       display: block;
-      margin-bottom: 6px;
-      margin-top: 14px;
+      margin-bottom: 5px;
+      margin-top: 12px;
     }
-
     label:first-of-type { margin-top: 0; }
 
     input[type="text"], textarea {
       width: 100%;
-      padding: 10px 12px;
+      padding: 9px 12px;
       border: 1px solid #ddd;
       border-radius: 8px;
       font-size: 14px;
@@ -54,26 +73,23 @@
       outline: none;
       background: #fafafa;
     }
-
     input[type="text"]:focus, textarea:focus {
       border-color: #888;
       background: white;
     }
-
     textarea { resize: vertical; }
 
     .btn {
-      margin-top: 16px;
-      padding: 10px 24px;
+      margin-top: 14px;
+      padding: 9px 22px;
       background: #1a1a1a;
       color: white;
       border: none;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
     }
-
     .btn:hover { background: #333; }
     .btn:disabled { background: #bbb; cursor: not-allowed; }
 
@@ -83,39 +99,30 @@
       border: 1px solid #ddd;
       margin-left: 8px;
     }
-
     .btn-secondary:hover { background: #f5f5f0; }
 
     .question-card {
       background: #f0f7ff;
       border: 1px solid #c8e0ff;
       border-radius: 12px;
-      padding: 20px 24px;
-      margin-bottom: 16px;
+      padding: 18px 22px;
+      margin-bottom: 14px;
     }
-
+    .q-counter { font-size: 11px; color: #888; margin-bottom: 6px; }
     .question-text {
       font-size: 15px;
       font-weight: 500;
-      color: #1a1a1a;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       line-height: 1.5;
-    }
-
-    .q-counter {
-      font-size: 11px;
-      color: #888;
-      margin-bottom: 8px;
     }
 
     .progress-bar {
       height: 3px;
       background: #e5e5e0;
       border-radius: 2px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       overflow: hidden;
     }
-
     .progress-fill {
       height: 100%;
       background: #1a1a1a;
@@ -126,132 +133,173 @@
     .loading {
       font-size: 13px;
       color: #888;
-      margin-top: 12px;
+      margin-top: 10px;
       display: none;
     }
 
-    .report-section {
+    /* Results tabs */
+    .results-container {
       background: white;
       border-radius: 12px;
-      padding: 24px;
       border: 1px solid #e5e5e0;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       display: none;
     }
 
-    .report-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 4px;
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid #e5e5e0;
+      overflow-x: auto;
     }
 
-    .report-meta {
-      font-size: 12px;
-      color: #aaa;
+    .tab-btn {
+      padding: 12px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #888;
+      border: none;
+      background: none;
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-btn:hover { color: #1a1a1a; }
+    .tab-btn.active {
+      color: #1a1a1a;
+      border-bottom-color: #1a1a1a;
+    }
+    .tab-btn .badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+    .badge-risk { background: #fff0f0; color: #c00; }
+    .badge-ok { background: #f0fff4; color: #060; }
+    .badge-med { background: #fff8f0; color: #930; }
+
+    .tab-panel { display: none; padding: 20px 24px; }
+    .tab-panel.active { display: block; }
+
+    .summary-box {
+      background: #f8f8f5;
+      border-left: 3px solid #1a1a1a;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
       margin-bottom: 16px;
     }
-
-    .report-body {
-      font-size: 14px;
-      line-height: 1.8;
-      color: #1a1a1a;
-      white-space: pre-wrap;
+    .summary-box p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+    }
+    .summary-box .summary-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin-bottom: 6px;
     }
 
+    .agent-meta {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 14px;
+    }
+
+    .tags { margin-bottom: 12px; }
     .tag {
       display: inline-block;
-      background: #f0f0eb;
-      color: #444;
       font-size: 11px;
       font-weight: 500;
       padding: 3px 10px;
       border-radius: 20px;
       margin-right: 6px;
-      margin-bottom: 12px;
+      margin-bottom: 4px;
+    }
+    .tag-default { background: #f0f0eb; color: #444; }
+    .tag-rbi { background: #fff0f0; color: #c00; }
+    .tag-saved { background: #f0fff4; color: #060; }
+    .tag-cs { background: #f0f0ff; color: #339; }
+    .tag-competitor { background: #fff8f0; color: #930; }
+
+    .agent-output {
+      font-size: 13px;
+      line-height: 1.8;
+      color: #1a1a1a;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #e5e5e0;
+      border-radius: 8px;
+      padding: 14px;
+      background: #fafafa;
+      margin-bottom: 14px;
     }
 
-    .tag.rbi { background: #fff0f0; color: #c00; }
-    .tag.saved { background: #f0fff4; color: #060; }
-    .tag.cs { background: #f0f0ff; color: #339; }
-    .tag.competitor { background: #fff8f0; color: #930; }
-
-    .divider {
-      border: none;
-      border-top: 1px solid #e5e5e0;
-      margin: 24px 0;
-    }
-
-    .hidden { display: none; }
-
-    .agents-running {
+    .use-in-prd-bar {
       display: flex;
-      gap: 12px;
-      margin-top: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #f5f5f0;
+      border-radius: 8px;
+      margin-bottom: 14px;
     }
-
-    .agent-pill {
-      padding: 6px 14px;
-      border-radius: 20px;
+    .use-in-prd-bar p {
+      font-size: 12px;
+      color: #666;
+      margin: 0;
+    }
+    .use-btn {
+      padding: 7px 16px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 6px;
       font-size: 12px;
       font-weight: 500;
-      background: #f0f0eb;
-      color: #888;
-      animation: pulse 1.5s infinite;
+      cursor: pointer;
     }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-.options-container {
-      margin-bottom: 16px;
+    .use-btn:hover { background: #333; }
+    .use-btn.used {
+      background: #060;
+      cursor: default;
     }
 
     .options-heading {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       color: #444;
-      margin-bottom: 12px;
-      margin-top: 8px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
     .options-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 14px;
     }
 
     .option-card {
       background: white;
       border: 1px solid #e5e5e0;
       border-radius: 10px;
-      padding: 16px;
+      padding: 14px;
       cursor: pointer;
-      position: relative;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.15s;
     }
-
-    .option-card:hover {
-      border-color: #888;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .option-card.selected {
-      border-color: #1a1a1a;
-      box-shadow: 0 0 0 2px #1a1a1a;
-    }
-
-    .option-card.recommended {
-      border-color: #c8e0ff;
-      background: #f8fbff;
-    }
-
-    .option-card.recommended.selected {
-      border-color: #1a1a1a;
-      box-shadow: 0 0 0 2px #1a1a1a;
-    }
+    .option-card:hover { border-color: #888; }
+    .option-card.selected { border: 2px solid #1a1a1a; }
+    .option-card.recommended { border-color: #c8e0ff; background: #f8fbff; }
+    .option-card.recommended.selected { border: 2px solid #1a1a1a; }
 
     .rec-badge {
       font-size: 10px;
@@ -259,499 +307,616 @@
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: #0066cc;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
-
-    .option-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1a1a1a;
-      margin-bottom: 6px;
-    }
-
-    .option-summary {
-      font-size: 12px;
-      color: #666;
-      line-height: 1.5;
-      margin-bottom: 8px;
-    }
-
-    .option-meta {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
-    }
-
+    .option-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .option-summary { font-size: 11px; color: #666; line-height: 1.5; margin-bottom: 6px; }
+    .option-meta { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
     .option-tag {
-      font-size: 11px;
+      font-size: 10px;
       background: #f0f0eb;
       color: #666;
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 20px;
     }
+    .option-rationale { font-size: 11px; color: #888; line-height: 1.4; font-style: italic; }
 
-    .option-rationale {
-      font-size: 11px;
+    /* Step 3 loading */
+    .loading-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e5e0;
+      padding: 20px 24px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .agents-running { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+    .agent-pill {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: #f0f0eb;
       color: #888;
-      line-height: 1.4;
-      font-style: italic;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
     }
 
+    /* Bottom bar */
+    .bottom-bar {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e5e0;
+      padding: 14px 20px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .bottom-bar p { font-size: 13px; color: #666; margin: 0; }
+
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <div class="container">
+<div class="container">
 
-    <h1>PRD Agent Studio</h1>
-    <p class="subtitle">Full PRD review — competitive intelligence + CS impact, powered by Claude</p>
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div>
+      <h1>PRD Agent Studio</h1>
+      <p>Full PRD review powered by Claude — HDFC PIXEL Studio</p>
+    </div>
+    <button class="open-prd-btn" onclick="openPRDGenerator()">
+      Open PRD Generator →
+    </button>
+  </div>
 
-    <!-- STEP 1: Feature Input -->
-    <div class="card" id="step1-card">
-      <div class="step-label">Step 1 — Describe your feature</div>
+  <!-- Step 1: Input -->
+  <div class="card" id="step1-card">
+    <div class="step-label">Step 1 — describe your feature</div>
 
-      <label>Feature name</label>
-      <input type="text" id="feature-name"
-        placeholder="e.g. Credit balance refund to bank account"/>
+    <label>Feature name</label>
+    <input type="text" id="feature-name"
+      placeholder="e.g. Annual Statement for PIXEL Play users"/>
 
-      <label>Feature description</label>
-      <textarea id="feature-input" rows="5"
-        placeholder="Describe the feature in detail — who uses it, what problem it solves, how it works, any thresholds or rules, target segment."></textarea>
+    <label>Feature description</label>
+    <textarea id="feature-input" rows="5"
+      placeholder="Describe the feature in detail — who uses it, what problem it solves, how it works, any thresholds or rules, target segment."></textarea>
 
-      <label>Competitors to check
-        <span style="font-weight:400;color:#aaa">(optional — comma separated)</span>
-      </label>
-      <input type="text" id="competitors-input"
-        placeholder="e.g. OneCard, Scapia, Slice — leave blank for automatic discovery"/>
+    <label>Competitors to check
+      <span style="font-weight:400;color:#aaa">(optional)</span>
+    </label>
+    <input type="text" id="competitors-input"
+      placeholder="e.g. OneCard, Scapia — leave blank for automatic discovery"/>
 
-      <br/>
-      <button class="btn" id="start-btn" onclick="startClarification()">
-        Start PRD review →
+    <br/>
+    <button class="btn" id="start-btn" onclick="startClarification()">
+      Start PRD review →
+    </button>
+    <p class="loading" id="loading-1">Getting first question...</p>
+  </div>
+
+  <!-- Step 2: Clarifying questions -->
+  <div id="step2-card" class="hidden">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="question-card">
+      <div class="q-counter" id="q-counter">Question 1 of up to 3</div>
+      <div class="question-text" id="question-text"></div>
+      <textarea id="answer-input" rows="3" placeholder="Your answer..."></textarea>
+      <div>
+        <button class="btn" id="next-btn" onclick="submitAnswer()">Next →</button>
+        <button class="btn btn-secondary" onclick="skipToAnalysis()">Skip to review</button>
+      </div>
+      <p class="loading" id="loading-2">Thinking...</p>
+    </div>
+  </div>
+
+  <!-- Step 3: Loading -->
+  <div class="loading-card" id="step3-card">
+    <div class="step-label">Running full PRD review</div>
+    <p style="font-size:13px;color:#666;">
+      Four agents running in parallel. This takes 30-45 seconds.
+    </p>
+    <div class="agents-running">
+      <div class="agent-pill">🔍 Competitor</div>
+      <div class="agent-pill">💬 CS Impact</div>
+      <div class="agent-pill">⚖️ Compliance</div>
+      <div class="agent-pill">📋 Spec</div>
+    </div>
+  </div>
+
+  <!-- Step 4: Results tabs -->
+  <div class="results-container" id="results-container">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('competitor')">
+        🔍 Competitor
+        <span class="badge badge-med" id="tab-badge-competitor"></span>
       </button>
-      <p class="loading" id="loading-1">Getting first question...</p>
+      <button class="tab-btn" onclick="switchTab('cs')">
+        💬 CS Impact
+        <span class="badge badge-ok" id="tab-badge-cs"></span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('compliance')">
+        ⚖️ Compliance
+        <span class="badge badge-risk" id="tab-badge-compliance"></span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('spec')">
+        📋 Spec
+        <span class="badge badge-ok" id="tab-badge-spec"></span>
+      </button>
     </div>
 
-    <!-- STEP 2: Clarifying Questions -->
-    <div id="step2-card" class="hidden">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    <!-- Competitor tab -->
+    <div class="tab-panel active" id="panel-competitor">
+      <div class="tags" id="tags-competitor"></div>
+      <div class="agent-meta" id="meta-competitor"></div>
+      <div class="summary-box" id="summary-competitor">
+        <div class="summary-label">Key takeaways</div>
+        <p id="summary-text-competitor">Loading summary...</p>
       </div>
-
-      <div class="question-card">
-        <div class="q-counter" id="q-counter">Question 1 of up to 3</div>
-        <div class="question-text" id="question-text"></div>
-        <textarea id="answer-input" rows="3"
-          placeholder="Your answer..."></textarea>
-        <div>
-          <button class="btn" id="next-btn" onclick="submitAnswer()">
-            Next →
-          </button>
-          <button class="btn btn-secondary" onclick="skipToAnalysis()">
-            Skip to review
-          </button>
-        </div>
-        <p class="loading" id="loading-2">Thinking...</p>
-      </div>
-    </div>
-
-    <!-- STEP 3: Agents Running -->
-    <div id="step3-card" class="hidden">
-      <div class="card">
-        <div class="step-label">Running full PRD review</div>
-        <p style="font-size:13px;color:#666;">
-          Four agents running in parallel. This takes 30-45 seconds.
-        </p>
-        <div class="agents-running">
-          <div class="agent-pill">🔍 Competitor Agent</div>
-          <div class="agent-pill">💬 CS Impact Agent</div>
-          <div class="agent-pill">⚖️ Compliance Agent</div>
-          <div class="agent-pill">📋 Spec Agent</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 4: Results — Competitor Section -->
-    <div class="report-section" id="competitor-section">
-      <div id="competitor-tags"></div>
-      <div class="report-title">Competitive Intelligence</div>
-      <div class="report-meta" id="competitor-meta"></div>
-      <div class="report-body" id="competitor-body"></div>
-    </div>
-
-    <hr class="divider" id="report-divider" style="display:none"/>
-
-    <!-- STEP 5: Results — CS Section -->
-    <div class="report-section" id="cs-section">
-      <div id="cs-tags"></div>
-      <div class="report-title">CS Impact Analysis</div>
-      <div class="report-meta" id="cs-meta"></div>
-      <div class="report-body" id="cs-body"></div>
-    </div>
-
-    <!-- Options: Competitor -->
-    <div id="competitor-options" class="options-container"></div>
-
-    <!-- Options: CS -->  
-    <div id="cs-options" class="options-container"></div>
-
-    <!-- Compliance Section -->
-    <div class="report-section" id="compliance-section">
-      <div id="compliance-tags"></div>
-      <div class="report-title">Compliance & Regulatory Analysis</div>
-      <div class="report-meta" id="compliance-meta"></div>
-      <div class="report-body" id="compliance-body"></div>
-    </div>
-
-    <!-- Spec Section -->
-    <div class="report-section" id="spec-section">
-      <div id="spec-tags"></div>
-      <div class="report-title">Use Cases, Acceptance Criteria & Metrics</div>
-      <div class="report-meta" id="spec-meta"></div>
-      <div class="report-body" id="spec-body"></div>
-    </div>
-
-    <!-- Generate PRD -->
-    <div id="generate-section" style="display:none;">
-      <div class="card">
-        <div class="step-label">Step 4 — Generate PRD</div>
-        <p style="font-size:13px;color:#666;margin-bottom:16px;">
-          Select one option from each agent above, then generate your PRD.
-        </p>
-        <button class="btn" id="generate-prd-btn" 
-          onclick="generatePRD()" disabled>
-          Select options to generate PRD (0/2 selected)
+      <div class="use-in-prd-bar">
+        <p>Use competitive intelligence in your PRD</p>
+        <button class="use-btn" id="use-btn-competitor"
+          onclick="useInPRD('competitor')">
+          Use in PRD →
         </button>
       </div>
+      <div class="agent-output" id="output-competitor"></div>
+      <div id="options-competitor"></div>
     </div>
 
-    <!-- PRD Output -->
-    <div class="report-section" id="prd-section" style="display:none;">
-      <div class="report-title">Generated PRD</div>
-      <div class="report-meta">Generated from agent selections</div>
-      <div class="report-body" id="prd-body"></div>
+    <!-- CS tab -->
+    <div class="tab-panel" id="panel-cs">
+      <div class="tags" id="tags-cs"></div>
+      <div class="agent-meta" id="meta-cs"></div>
+      <div class="summary-box" id="summary-cs">
+        <div class="summary-label">Key takeaways</div>
+        <p id="summary-text-cs">Loading summary...</p>
+      </div>
+      <div class="use-in-prd-bar">
+        <p>Use CS impact analysis in your PRD</p>
+        <button class="use-btn" id="use-btn-cs"
+          onclick="useInPRD('cs')">
+          Use in PRD →
+        </button>
+      </div>
+      <div class="agent-output" id="output-cs"></div>
+    </div>
+
+    <!-- Compliance tab -->
+    <div class="tab-panel" id="panel-compliance">
+      <div class="tags" id="tags-compliance"></div>
+      <div class="agent-meta" id="meta-compliance"></div>
+      <div class="summary-box" id="summary-compliance">
+        <div class="summary-label">Key takeaways</div>
+        <p id="summary-text-compliance">Loading summary...</p>
+      </div>
+      <div class="use-in-prd-bar">
+        <p>Use RBI compliance analysis in your PRD</p>
+        <button class="use-btn" id="use-btn-compliance"
+          onclick="useInPRD('compliance')">
+          Use in PRD →
+        </button>
+      </div>
+      <div class="agent-output" id="output-compliance"></div>
+    </div>
+
+    <!-- Spec tab -->
+    <div class="tab-panel" id="panel-spec">
+      <div class="tags" id="tags-spec"></div>
+      <div class="agent-meta" id="meta-spec"></div>
+      <div class="summary-box" id="summary-spec">
+        <div class="summary-label">Key takeaways</div>
+        <p id="summary-text-spec">Loading summary...</p>
+      </div>
+      <div class="use-in-prd-bar">
+        <p>Use use cases and acceptance criteria in your PRD</p>
+        <button class="use-btn" id="use-btn-spec"
+          onclick="useInPRD('spec')">
+          Use in PRD →
+        </button>
+      </div>
+      <div class="agent-output" id="output-spec"></div>
     </div>
 
   </div>
 
-  <script>
-    let qaHistory = [];
-    let currentQuestion = '';
-    let selectedOptions = {};
+  <!-- Bottom bar -->
+  <div class="bottom-bar" id="bottom-bar">
+    <p id="bottom-status">Run a review to get started</p>
+    <button class="open-prd-btn" onclick="openPRDGenerator()">
+      Open PRD Generator →
+    </button>
+  </div>
 
-    function getInputs() {
-      return {
-        feature_name: document.getElementById('feature-name').value.trim(),
-        feature_description: document.getElementById('feature-input').value.trim(),
-        competitors: document.getElementById('competitors-input').value.trim()
-      };
+</div>
+
+<script>
+  let qaHistory = [];
+  let currentQuestion = '';
+  let prdData = {};
+  let selectedForPRD = {};
+
+  function getInputs() {
+    return {
+      feature_name: document.getElementById('feature-name').value.trim(),
+      feature_description: document.getElementById('feature-input').value.trim(),
+      competitors: document.getElementById('competitors-input').value.trim()
+    };
+  }
+
+  function validateStep1() {
+    const { feature_name, feature_description } = getInputs();
+    if (!feature_name || !feature_description) {
+      alert('Please fill in both feature name and description.');
+      return false;
     }
+    return true;
+  }
 
-    function validateStep1() {
-      const { feature_name, feature_description } = getInputs();
-      if (!feature_name || !feature_description) {
-        alert('Please fill in both feature name and description.');
-        return false;
-      }
-      return true;
-    }
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+  }
 
-    async function startClarification() {
-      if (!validateStep1()) return;
-
-      const btn = document.getElementById('start-btn');
-      const loading = document.getElementById('loading-1');
-      btn.disabled = true;
-      loading.style.display = 'block';
-
-      const inputs = getInputs();
-
-      try {
-        const res = await fetch('http://localhost:8000/clarify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...inputs, qa_history: [] })
-        });
-        const data = await res.json();
-
-        if (data.ready) {
-          await runReview();
-        } else {
-          showQuestion(data.question, data.question_number);
-        }
-      } catch (err) {
-        alert('Error: could not reach server. Make sure uvicorn is running.');
-      } finally {
-        btn.disabled = false;
-        loading.style.display = 'none';
-      }
-    }
-
-    function showQuestion(question, questionNumber) {
-      currentQuestion = question;
-      document.getElementById('step1-card').style.opacity = '0.5';
-      document.getElementById('step2-card').classList.remove('hidden');
-      document.getElementById('question-text').textContent = question;
-      document.getElementById('q-counter').textContent =
-        `Question ${questionNumber} of up to 3`;
-      document.getElementById('progress-fill').style.width =
-        `${(questionNumber - 1) * 33}%`;
-      document.getElementById('answer-input').value = '';
-      document.getElementById('answer-input').focus();
-    }
-
-    async function submitAnswer() {
-      const answer = document.getElementById('answer-input').value.trim();
-      if (!answer) {
-        alert('Please provide an answer before continuing.');
-        return;
-      }
-
-      qaHistory.push({ question: currentQuestion, answer });
-
-      const btn = document.getElementById('next-btn');
-      const loading = document.getElementById('loading-2');
-      btn.disabled = true;
-      loading.style.display = 'block';
-
-      const inputs = getInputs();
-
-      try {
-        const res = await fetch('http://localhost:8000/clarify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...inputs, qa_history: qaHistory })
-        });
-        const data = await res.json();
-
-        if (data.ready) {
-          document.getElementById('step2-card').classList.add('hidden');
-          await runReview();
-        } else {
-          showQuestion(data.question, data.question_number);
-        }
-      } catch (err) {
-        alert('Error reaching server.');
-      } finally {
-        btn.disabled = false;
-        loading.style.display = 'none';
-      }
-    }
-
-    async function skipToAnalysis() {
-      document.getElementById('step2-card').classList.add('hidden');
-      await runReview();
-    }
-
-    async function runReview() {
-      document.getElementById('step3-card').classList.remove('hidden');
-      window.scrollTo(0, document.body.scrollHeight);
-
-      const inputs = getInputs();
-
-      try {
-        const res = await fetch('http://localhost:8000/review', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...inputs, qa_history: qaHistory })
-        });
-
-        const data = await res.json();
-        document.getElementById('step3-card').classList.add('hidden');
-        showResults(data);
-      } catch (err) {
-        document.getElementById('step3-card').classList.add('hidden');
-        alert('Error running review. Check server logs.');
-      }
-    }
-
-    function showResults(data) {
-      const competitorData = data.competitor_analysis;
-      const csData = data.cs_analysis;
-
-      // Competitor section
-      const compTags = document.getElementById('competitor-tags');
-      compTags.innerHTML = '';
-      addTag(compTags, 'Competitor Agent', 'competitor');
-      if (data.rbi_triggered) addTag(compTags, 'RBI Triggered', 'rbi');
-      if (data.saved_to) addTag(compTags, 'Saved locally', 'saved');
-
-      document.getElementById('competitor-meta').textContent =
-        `${data.sources_searched} sources searched · ` +
-        `${data.qa_history?.length || 0} clarifying questions · ` +
-        `${new Date().toLocaleTimeString()}`;
-
-      document.getElementById('competitor-body').textContent =
-        competitorData.response;
-      document.getElementById('competitor-section').style.display = 'block';
-
-      // Render competitor options
-      if (competitorData.options && competitorData.options.choices) {
-        renderOptions('competitor-options', competitorData.options, 'differentiation');
-      }
-
-      document.getElementById('report-divider').style.display = 'block';
-
-      // CS section
-      const csTags = document.getElementById('cs-tags');
-      csTags.innerHTML = '';
-      addTag(csTags, 'CS Impact Agent', 'cs');
-      if (csData.rbi_triggered) addTag(csTags, 'RBI Triggered', 'rbi');
-
-      document.getElementById('cs-meta').textContent =
-        `PRD: ${csData.prd_used} · ${new Date().toLocaleTimeString()}`;
-
-      document.getElementById('cs-body').textContent = csData.response;
-      document.getElementById('cs-section').style.display = 'block';
-
-      // Render CS options
-      if (csData.options && csData.options.choices) {
-        renderOptions('cs-options', csData.options, 'cs_strategy');
-      }
-
-      // Compliance section
-      const complianceData = data.compliance_analysis;
-      if (complianceData) {
-        const complianceTags = document.getElementById('compliance-tags');
-        complianceTags.innerHTML = '';
-        addTag(complianceTags, 'Compliance Agent', 'rbi');
-        if (complianceData.rbi_sections_found) {
-          addTag(complianceTags, 'RBI Sections Found', 'rbi');
-        }
-
-        document.getElementById('compliance-meta').textContent =
-          `RBI documents analysed · ${new Date().toLocaleTimeString()}`;
-
-        document.getElementById('compliance-body').textContent =
-          complianceData.response;
-        document.getElementById('compliance-section').style.display = 'block';
-      }
-
-      // Spec section
-      const specData = data.spec_analysis;
-      if (specData) {
-        const specTags = document.getElementById('spec-tags');
-        specTags.innerHTML = '';
-        addTag(specTags, 'Spec Agent', 'cs');
-        addTag(specTags, specData.sop_used?.replace('SOP: ', '') || 'SOP loaded', 'saved');
-
-        document.getElementById('spec-meta').textContent =
-          `Use cases + acceptance criteria + metrics · ${new Date().toLocaleTimeString()}`;
-
-        document.getElementById('spec-body').textContent = specData.response;
-        document.getElementById('spec-section').style.display = 'block';
-      }
-
-      // Show generate PRD button
-      document.getElementById('generate-section').style.display = 'block';
-
-      window.scrollTo(0, document.body.scrollHeight);
-    }
-
-    function renderOptions(containerId, optionsData, sectionKey) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-
-      container.innerHTML = '';
-
-      const heading = document.createElement('div');
-      heading.className = 'options-heading';
-      heading.textContent = sectionKey === 'differentiation'
-        ? 'Pick your differentiation angle for the PRD:'
-        : 'Pick your CS strategy for the PRD:';
-      container.appendChild(heading);
-
-      const grid = document.createElement('div');
-      grid.className = 'options-grid';
-
-      optionsData.choices.forEach((choice) => {
-        const card = document.createElement('div');
-        card.className = `option-card ${choice.recommended ? 'recommended' : ''}`;
-        card.id = `option-${sectionKey}-${choice.id}`;
-
-        card.innerHTML = `
-          ${choice.recommended ? '<div class="rec-badge">Recommended</div>' : ''}
-          <div class="option-title">${choice.title}</div>
-          <div class="option-summary">${choice.summary}</div>
-          <div class="option-meta">
-            <span class="option-tag">${choice.complexity} complexity</span>
-            ${choice.ticket_reduction
-              ? `<span class="option-tag">${choice.ticket_reduction} ticket reduction</span>`
-              : ''}
-          </div>
-          <div class="option-rationale">${choice.rationale}</div>
-        `;
-
-        card.onclick = () => selectOption(sectionKey, choice, card);
-        grid.appendChild(card);
+  async function startClarification() {
+    if (!validateStep1()) return;
+    const btn = document.getElementById('start-btn');
+    const loading = document.getElementById('loading-1');
+    btn.disabled = true;
+    loading.style.display = 'block';
+    const inputs = getInputs();
+    try {
+      const res = await fetch('http://localhost:8000/clarify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...inputs, qa_history: [] })
       });
-
-      container.appendChild(grid);
-    }
-
-    function selectOption(sectionKey, choice, cardElement) {
-      document.querySelectorAll(`[id^="option-${sectionKey}"]`).forEach(c => {
-        c.classList.remove('selected');
-      });
-      cardElement.classList.add('selected');
-      selectedOptions[sectionKey] = choice;
-      updateGenerateButton();
-    }
-
-    function updateGenerateButton() {
-      const btn = document.getElementById('generate-prd-btn');
-      const count = Object.keys(selectedOptions).length;
-      if (count === 2) {
-        btn.textContent = 'Generate PRD →';
-        btn.disabled = false;
+      const data = await res.json();
+      if (data.ready) {
+        await runReview();
       } else {
-        btn.textContent = `Select options to generate PRD (${count}/2 selected)`;
-        btn.disabled = true;
+        showQuestion(data.question, data.question_number);
+      }
+    } catch (err) {
+      alert('Error: could not reach server. Make sure uvicorn is running.');
+    } finally {
+      btn.disabled = false;
+      loading.style.display = 'none';
+    }
+  }
+
+  function showQuestion(question, questionNumber) {
+    currentQuestion = question;
+    document.getElementById('step1-card').style.opacity = '0.5';
+    document.getElementById('step2-card').classList.remove('hidden');
+    document.getElementById('question-text').textContent = question;
+    document.getElementById('q-counter').textContent =
+      `Question ${questionNumber} of up to 3`;
+    document.getElementById('progress-fill').style.width =
+      `${(questionNumber - 1) * 33}%`;
+    document.getElementById('answer-input').value = '';
+    document.getElementById('answer-input').focus();
+  }
+
+  async function submitAnswer() {
+    const answer = document.getElementById('answer-input').value.trim();
+    if (!answer) { alert('Please provide an answer.'); return; }
+    qaHistory.push({ question: currentQuestion, answer });
+    const btn = document.getElementById('next-btn');
+    const loading = document.getElementById('loading-2');
+    btn.disabled = true;
+    loading.style.display = 'block';
+    const inputs = getInputs();
+    try {
+      const res = await fetch('http://localhost:8000/clarify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...inputs, qa_history: qaHistory })
+      });
+      const data = await res.json();
+      if (data.ready) {
+        document.getElementById('step2-card').classList.add('hidden');
+        await runReview();
+      } else {
+        showQuestion(data.question, data.question_number);
+      }
+    } catch (err) {
+      alert('Error reaching server.');
+    } finally {
+      btn.disabled = false;
+      loading.style.display = 'none';
+    }
+  }
+
+  async function skipToAnalysis() {
+    document.getElementById('step2-card').classList.add('hidden');
+    await runReview();
+  }
+
+  async function runReview() {
+    document.getElementById('step3-card').style.display = 'block';
+    window.scrollTo(0, document.body.scrollHeight);
+    const inputs = getInputs();
+    try {
+      const res = await fetch('http://localhost:8000/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...inputs, qa_history: qaHistory })
+      });
+      const data = await res.json();
+      document.getElementById('step3-card').style.display = 'none';
+      showResults(data);
+    } catch (err) {
+      document.getElementById('step3-card').style.display = 'none';
+      alert('Error running review. Check server logs.');
+    }
+  }
+
+  function extractSummary(text, agentType) {
+    if (!text) return 'Summary not available.';
+    const lines = text.split('\n').filter(l => l.trim().length > 20);
+
+    if (agentType === 'competitor') {
+      const whitespace = lines.find(l =>
+        l.toLowerCase().includes('first-mover') ||
+        l.toLowerCase().includes('whitespace'));
+      const diff = lines.find(l =>
+        l.toLowerCase().includes('recommended angle') ||
+        l.toLowerCase().includes('pixel should'));
+      const conf = lines.find(l =>
+        l.toLowerCase().includes('confidence'));
+      return [whitespace, diff, conf]
+        .filter(Boolean).slice(0, 3)
+        .join(' · ') || lines.slice(0, 2).join(' ');
+    }
+
+    if (agentType === 'cs') {
+      const score = lines.find(l =>
+        l.toLowerCase().includes('readiness score') ||
+        l.toLowerCase().includes('/10'));
+      const high = lines.find(l =>
+        l.toLowerCase().includes('high') &&
+        l.toLowerCase().includes('likelihood'));
+      const deflect = lines.find(l =>
+        l.toLowerCase().includes('deflect') ||
+        l.toLowerCase().includes('self-serve'));
+      return [score, high, deflect]
+        .filter(Boolean).slice(0, 3)
+        .join(' · ') || lines.slice(0, 2).join(' ');
+    }
+
+    if (agentType === 'compliance') {
+      const risk = lines.find(l =>
+        l.toLowerCase().includes('compliance risk'));
+      const blocker = lines.find(l =>
+        l.toLowerCase().includes('launch blocker') ||
+        l.toLowerCase().includes('cannot proceed'));
+      const reqs = lines.find(l =>
+        l.toLowerCase().includes('must comply') ||
+        l.toLowerCase().includes('mandatory'));
+      return [risk, blocker, reqs]
+        .filter(Boolean).slice(0, 3)
+        .join(' · ') || lines.slice(0, 2).join(' ');
+    }
+
+    if (agentType === 'spec') {
+      const scope = lines.find(l =>
+        l.toLowerCase().includes('in scope'));
+      const uc = lines.find(l =>
+        l.toLowerCase().includes('use case'));
+      const metric = lines.find(l =>
+        l.toLowerCase().includes('metric') ||
+        l.toLowerCase().includes('kpi'));
+      return [scope, uc, metric]
+        .filter(Boolean).slice(0, 3)
+        .join(' · ') || lines.slice(0, 2).join(' ');
+    }
+
+    return lines.slice(0, 2).join(' ');
+  }
+
+  function extractKeyContent(agentType, data) {
+    const text = data.response || '';
+    if (agentType === 'competitor') {
+      const sections = ['PIXEL STUDIO DIFFERENTIATION', 'RECOMMENDED ANGLE',
+        'WHITESPACE SIGNAL', 'COMPETITORS'];
+      return extractSections(text, sections, 800);
+    }
+    if (agentType === 'cs') {
+      const sections = ['TICKET DEFLECTION', 'WHAT REAL USERS SAY',
+        'OVERALL CS READINESS'];
+      return extractSections(text, sections, 800);
+    }
+    if (agentType === 'compliance') {
+      const sections = ['COMPLIANCE REQUIREMENTS', 'LAUNCH BLOCKERS',
+        'APPLICABLE RBI REGULATIONS'];
+      return extractSections(text, sections, 1000);
+    }
+    if (agentType === 'spec') {
+      const sections = ['FUNCTIONAL USE CASES', 'SCOPE',
+        'METRICS IMPACT', 'INSTRUMENTATION'];
+      return extractSections(text, sections, 1200);
+    }
+    return text.slice(0, 800);
+  }
+
+  function extractSections(text, sectionNames, maxChars) {
+    let result = '';
+    for (const section of sectionNames) {
+      const idx = text.toUpperCase().indexOf(section.toUpperCase());
+      if (idx !== -1) {
+        result += text.slice(idx, idx + 400) + '\n\n';
       }
     }
+    return result.slice(0, maxChars) || text.slice(0, maxChars);
+  }
 
-    async function generatePRD() {
-      const btn = document.getElementById('generate-prd-btn');
-      btn.disabled = true;
-      btn.textContent = 'Generating PRD... this takes 20-30 seconds';
+  function showResults(data) {
+    prdData = data;
+    const container = document.getElementById('results-container');
+    container.style.display = 'block';
 
-      const inputs = getInputs();
+    const comp = data.competitor_analysis;
+    const cs = data.cs_analysis;
+    const compliance = data.compliance_analysis;
+    const spec = data.spec_analysis;
 
-      try {
-        const res = await fetch('http://localhost:8000/generate-prd', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            feature_name: inputs.feature_name,
-            feature_description: inputs.feature_description,
-            selected_options: selectedOptions,
-            qa_history: qaHistory
-          })
-        });
-
-        const data = await res.json();
-        showPRD(data);
-      } catch (err) {
-        alert('Error generating PRD. Check server logs.');
-        btn.disabled = false;
-        btn.textContent = 'Generate PRD →';
+    // Competitor tab
+    if (comp) {
+      addTags('tags-competitor', [
+        { text: 'Competitor', cls: 'tag-competitor' },
+        data.rbi_triggered ? { text: 'RBI', cls: 'tag-rbi' } : null
+      ]);
+      document.getElementById('meta-competitor').textContent =
+        `${data.sources_searched || 0} sources · ${qaHistory.length} clarifying questions · ${new Date().toLocaleTimeString()}`;
+      document.getElementById('summary-text-competitor').textContent =
+        extractSummary(comp.response, 'competitor');
+      document.getElementById('output-competitor').textContent = comp.response;
+      if (comp.options?.choices) {
+        renderOptions('options-competitor', comp.options, 'differentiation');
       }
+      document.getElementById('tab-badge-competitor').textContent = 'Medium';
     }
 
-    function showPRD(data) {
-      const section = document.getElementById('prd-section');
-      const body = document.getElementById('prd-body');
-      body.textContent = data.prd;
-      section.style.display = 'block';
-      window.scrollTo(0, document.body.scrollHeight);
+    // CS tab
+    if (cs) {
+      addTags('tags-cs', [{ text: 'CS Impact', cls: 'tag-cs' }]);
+      document.getElementById('meta-cs').textContent =
+        `PRD: ${cs.prd_used || 'loaded'} · ${new Date().toLocaleTimeString()}`;
+      document.getElementById('summary-text-cs').textContent =
+        extractSummary(cs.response, 'cs');
+      document.getElementById('output-cs').textContent = cs.response;
+      document.getElementById('tab-badge-cs').textContent = 'Ready';
     }
 
-    function addTag(container, text, type) {
-      const tag = document.createElement('span');
-      tag.className = `tag ${type}`;
-      tag.textContent = text;
-      container.appendChild(tag);
+    // Compliance tab
+    if (compliance) {
+      addTags('tags-compliance', [
+        { text: 'Compliance', cls: 'tag-rbi' },
+        compliance.rbi_sections_found ?
+          { text: 'RBI found', cls: 'tag-saved' } :
+          { text: 'Legal review needed', cls: 'tag-rbi' }
+      ]);
+      document.getElementById('meta-compliance').textContent =
+        `RBI docs analysed · ${new Date().toLocaleTimeString()}`;
+      document.getElementById('summary-text-compliance').textContent =
+        extractSummary(compliance.response, 'compliance');
+      document.getElementById('output-compliance').textContent =
+        compliance.response;
+      document.getElementById('tab-badge-compliance').textContent = 'Review';
     }
-  </script>
-  
+
+    // Spec tab
+    if (spec) {
+      addTags('tags-spec', [
+        { text: 'Spec Agent', cls: 'tag-cs' },
+        { text: spec.sop_used?.replace('SOP: ', '') || 'SOP loaded',
+          cls: 'tag-saved' }
+      ]);
+      document.getElementById('meta-spec').textContent =
+        `Use cases + AC + metrics · ${new Date().toLocaleTimeString()}`;
+      document.getElementById('summary-text-spec').textContent =
+        extractSummary(spec.response, 'spec');
+      document.getElementById('output-spec').textContent = spec.response;
+      document.getElementById('tab-badge-spec').textContent = 'Ready';
+    }
+
+    // Bottom bar
+    const bottomBar = document.getElementById('bottom-bar');
+    bottomBar.style.display = 'flex';
+    updateBottomStatus();
+
+    window.scrollTo(0, document.getElementById('results-container').offsetTop);
+  }
+
+  function addTags(containerId, tags) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    tags.filter(Boolean).forEach(tag => {
+      const span = document.createElement('span');
+      span.className = `tag ${tag.cls}`;
+      span.textContent = tag.text;
+      container.appendChild(span);
+    });
+  }
+
+  function renderOptions(containerId, optionsData, sectionKey) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    const heading = document.createElement('div');
+    heading.className = 'options-heading';
+    heading.textContent = 'Pick your differentiation angle:';
+    container.appendChild(heading);
+    const grid = document.createElement('div');
+    grid.className = 'options-grid';
+    optionsData.choices.forEach(choice => {
+      const card = document.createElement('div');
+      card.className = `option-card ${choice.recommended ? 'recommended' : ''}`;
+      card.id = `option-${sectionKey}-${choice.id}`;
+      card.innerHTML = `
+        ${choice.recommended ? '<div class="rec-badge">Recommended</div>' : ''}
+        <div class="option-title">${choice.title}</div>
+        <div class="option-summary">${choice.summary}</div>
+        <div class="option-meta">
+          <span class="option-tag">${choice.complexity} complexity</span>
+          ${choice.ticket_reduction ?
+            `<span class="option-tag">${choice.ticket_reduction} ticket reduction</span>` : ''}
+        </div>
+        <div class="option-rationale">${choice.rationale}</div>
+      `;
+      card.onclick = () => {
+        document.querySelectorAll(`[id^="option-${sectionKey}"]`)
+          .forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+      };
+      grid.appendChild(card);
+    });
+    container.appendChild(grid);
+  }
+
+  function useInPRD(agentType) {
+    const content = extractKeyContent(agentType, prdData[agentType + '_analysis']);
+    selectedForPRD[agentType] = content;
+    localStorage.setItem('prd_studio_selections',
+      JSON.stringify(selectedForPRD));
+    localStorage.setItem('prd_studio_feature',
+      JSON.stringify(getInputs()));
+
+    const btn = document.getElementById('use-btn-' + agentType);
+    btn.textContent = '✓ Added to PRD';
+    btn.classList.add('used');
+
+    updateBottomStatus();
+  }
+
+  function updateBottomStatus() {
+    const count = Object.keys(selectedForPRD).length;
+    const status = document.getElementById('bottom-status');
+    if (count === 0) {
+      status.textContent = 'Click "Use in PRD" on any tab to add content to your PRD';
+    } else {
+      const names = Object.keys(selectedForPRD)
+        .map(k => k.charAt(0).toUpperCase() + k.slice(1));
+      status.textContent = `${names.join(', ')} added to PRD Generator`;
+    }
+  }
+
+  function openPRDGenerator() {
+    localStorage.setItem('prd_studio_selections',
+      JSON.stringify(selectedForPRD));
+    localStorage.setItem('prd_studio_feature',
+      JSON.stringify(getInputs()));
+    window.open('/ui/prd-form.html', '_blank');
+  }
+</script>
 </body>
 </html>

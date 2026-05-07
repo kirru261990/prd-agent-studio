@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRD Generator — PIXEL Studio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f0;
+      color: #1a1a1a;
+      padding: 32px 20px;
+    }
+    .container { max-width: 860px; margin: 0 auto; }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .top-bar h1 { font-size: 20px; font-weight: 600; }
+    .top-bar p { font-size: 13px; color: #888; margin-top: 2px; }
+
+    .back-btn {
+      font-size: 13px;
+      color: #888;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+    }
+    .back-btn:hover { color: #1a1a1a; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 14px;
+      border: 1px solid #e5e5e0;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .section-number {
+      font-size: 20px;
+      font-weight: 600;
+      color: #e5e5e0;
+      float: right;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #444;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .pre-filled {
+      border-color: #c8e0ff;
+      background: #f8fbff;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    textarea:focus { border-color: #888; background: white; }
+    textarea.pre-filled { border-color: #c8e0ff; background: #f8fbff; }
+    textarea.pre-filled:focus { border-color: #0066cc; background: white; }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      background: #fafafa;
+    }
+    input[type="text"]:focus { border-color: #888; background: white; }
+
+    .pre-fill-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #f0f0ff;
+      color: #339;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .generate-btn {
+      width: 100%;
+      padding: 14px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .generate-btn:hover { background: #333; }
+    .generate-btn:disabled { background: #bbb; cursor: not-allowed; }
+
+    .status {
+      font-size: 13px;
+      color: #888;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .output-section { display: none; }
+
+    .output-header {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .output-body {
+      font-size: 13px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      border: 1px solid #e5e5e0;
+      border-radius: 10px;
+      padding: 20px;
+      background: #fafafa;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .copy-btn {
+      flex: 1;
+      padding: 10px;
+      background: white;
+      color: #1a1a1a;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: #f5f5f0; }
+
+    .download-btn {
+      flex: 1;
+      padding: 10px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .download-btn:hover { background: #333; }
+    .download-btn:disabled { background: #bbb; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="top-bar">
+    <div>
+      <h1>PRD Generator</h1>
+      <p>Fill in the sections below — pre-filled fields come from your agent research</p>
+    </div>
+    <button class="back-btn" onclick="window.close()">← Back to Agent Studio</button>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="card">
+    <span class="section-number">01</span>
+    <div class="section-label">Problem statement</div>
+    <div class="hint">What user pain are you solving? State the pain, current behaviour, and business consequence. 3 sentences max.</div>
+    <textarea id="problem-statement" rows="4"
+      placeholder="e.g. Self-employed PIXEL Play users currently have no way to get a consolidated annual view of their credit card transactions for tax filing purposes..."></textarea>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="card">
+    <span class="section-number">02</span>
+    <div class="section-label">How bank currently solves this</div>
+    <div class="hint">What is the current process? What manual effort is involved?</div>
+    <textarea id="current-solution" rows="4"
+      placeholder="e.g. Users currently download 12 individual monthly statements manually and consolidate them..."></textarea>
+  </div>
+
+  <!-- Section 3 — pre-filled from competitor agent -->
+  <div class="card">
+    <span class="section-number">03</span>
+    <div class="section-label">
+      Competitive context
+      <span class="pre-fill-badge" id="badge-competitor" style="display:none">
+        Pre-filled from agent
+      </span>
+    </div>
+    <div class="hint">How are competitors solving this? What is PIXEL's differentiation angle?</div>
+    <textarea id="competitive-context" rows="6"
+      placeholder="Run the Agent Studio and click 'Use in PRD' on the Competitor tab to pre-fill this section..."
+      class="pre-filled"></textarea>
+  </div>
+
+  <!-- Section 4 — pre-filled from compliance agent -->
+  <div class="card">
+    <span class="section-number">04</span>
+    <div class="section-label">
+      RBI & regulatory requirements
+      <span class="pre-fill-badge" id="badge-compliance" style="display:none">
+        Pre-filled from agent
+      </span>
+    </div>
+    <div class="hint">What does RBI say? Quote exactly. List compliance requirements.</div>
+    <textarea id="rbi-requirements" rows="6"
+      placeholder="Run the Agent Studio and click 'Use in PRD' on the Compliance tab to pre-fill this section..."
+      class="pre-filled"></textarea>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="card">
+    <span class="section-number">05</span>
+    <div class="section-label">Scope</div>
+    <div class="hint">What's in scope and out of scope? Be specific. At least 2 out-of-scope items.</div>
+    <textarea id="scope" rows="5"
+      placeholder="In scope:&#10;- Annual statement PDF generation for up to 3 financial years&#10;&#10;Out of scope:&#10;- Calendar year statements (not relevant for Indian tax filing)&#10;- Email delivery of statements"></textarea>
+  </div>
+
+  <!-- Section 6 — pre-filled from spec agent -->
+  <div class="card">
+    <span class="section-number">06</span>
+    <div class="section-label">
+      Functional use cases & acceptance criteria
+      <span class="pre-fill-badge" id="badge-spec" style="display:none">
+        Pre-filled from agent
+      </span>
+    </div>
+    <div class="hint">User stories with Given/When/Then acceptance criteria including failure states.</div>
+    <textarea id="use-cases" rows="10"
+      placeholder="Run the Agent Studio and click 'Use in PRD' on the Spec tab to pre-fill this section..."
+      class="pre-filled"></textarea>
+  </div>
+
+  <!-- Section 7 — pre-filled from CS agent -->
+  <div class="card">
+    <span class="section-number">07</span>
+    <div class="section-label">
+      Customer support impact
+      <span class="pre-fill-badge" id="badge-cs" style="display:none">
+        Pre-filled from agent
+      </span>
+    </div>
+    <div class="hint">What CS tickets will this generate? How do we deflect them? What training is needed?</div>
+    <textarea id="cs-impact" rows="6"
+      placeholder="Run the Agent Studio and click 'Use in PRD' on the CS Impact tab to pre-fill this section..."
+      class="pre-filled"></textarea>
+  </div>
+
+  <!-- Section 8 -->
+  <div class="card">
+    <span class="section-number">08</span>
+    <div class="section-label">Operations impact</div>
+    <div class="hint">What manual ops effort does this create? How do we eliminate it?</div>
+    <textarea id="ops-impact" rows="5"
+      placeholder="e.g. Statement generation will be async — ops team needs a dashboard to monitor failed jobs and retry..."></textarea>
+  </div>
+
+  <!-- Section 9 -->
+  <div class="card">
+    <span class="section-number">09</span>
+    <div class="section-label">Success metrics</div>
+    <div class="hint">What metrics will this improve? Include baselines, targets, timeframes, and owners.</div>
+    <textarea id="metrics" rows="5"
+      placeholder="e.g. Annual statement downloads: 0 → 5,000/month in 90 days. Support tickets for statement requests: reduce by 40%..."></textarea>
+  </div>
+
+  <!-- Section 10 -->
+  <div class="card">
+    <span class="section-number">10</span>
+    <div class="section-label">Rollout strategy</div>
+    <div class="hint">MVP → V1 → V2. What ships first? What triggers expansion? Kill switch conditions?</div>
+    <textarea id="rollout" rows="6"
+      placeholder="MVP: Annual statement for FY 2024-25 only, 5% of users, invite-only.&#10;V1: All 3 financial years, 100% of users.&#10;V2: Email delivery, CA sharing link..."></textarea>
+  </div>
+
+  <!-- Section 11 -->
+  <div class="card">
+    <span class="section-number">11</span>
+    <div class="section-label">Reports & reconciliation impact</div>
+    <div class="hint">What new reports are needed? What reconciliation processes? Who consumes them?</div>
+    <textarea id="reports" rows="5"
+      placeholder="e.g. New report: Annual statement generation status (Ops, daily). Reconciliation: statements generated vs statements downloaded..."></textarea>
+  </div>
+
+  <!-- Section 12 -->
+  <div class="card">
+    <span class="section-number">12</span>
+    <div class="section-label">UX & instrumentation</div>
+    <div class="hint">What user events need to be tracked? What does the UX flow look like?</div>
+    <textarea id="instrumentation" rows="5"
+      placeholder="Events to track:&#10;- annual_statement_tab_viewed&#10;- annual_statement_generation_initiated&#10;- annual_statement_downloaded..."></textarea>
+  </div>
+
+  <!-- Generate -->
+  <div class="card">
+    <button class="generate-btn" id="generate-btn" onclick="generatePRD()">
+      Generate PRD →
+    </button>
+    <p class="status" id="status"></p>
+  </div>
+
+  <!-- Output -->
+  <div class="output-section" id="output-section">
+    <div class="card">
+      <div class="output-header">Generated PRD</div>
+      <div class="output-body" id="output-body"></div>
+      <div class="action-bar">
+        <button class="copy-btn" onclick="copyPRD()">Copy to clipboard</button>
+        <button class="download-btn" id="download-btn"
+          onclick="downloadDOCX()">
+          Download as Word doc
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Load pre-filled content from localStorage on page open
+  window.onload = function() {
+    const raw = localStorage.getItem('prd_studio_selections');
+    const featureRaw = localStorage.getItem('prd_studio_feature');
+
+    if (featureRaw) {
+      const feature = JSON.parse(featureRaw);
+      if (feature.feature_name) {
+        document.title = `PRD Generator — ${feature.feature_name}`;
+      }
+    }
+
+    if (raw) {
+      const selections = JSON.parse(raw);
+
+      if (selections.competitor) {
+        document.getElementById('competitive-context').value =
+          selections.competitor;
+        document.getElementById('competitive-context').classList.add('pre-filled');
+        document.getElementById('badge-competitor').style.display = 'inline-block';
+      }
+
+      if (selections.compliance) {
+        document.getElementById('rbi-requirements').value =
+          selections.compliance;
+        document.getElementById('rbi-requirements').classList.add('pre-filled');
+        document.getElementById('badge-compliance').style.display = 'inline-block';
+      }
+
+      if (selections.spec) {
+        document.getElementById('use-cases').value = selections.spec;
+        document.getElementById('use-cases').classList.add('pre-filled');
+        document.getElementById('badge-spec').style.display = 'inline-block';
+      }
+
+      if (selections.cs) {
+        document.getElementById('cs-impact').value = selections.cs;
+        document.getElementById('cs-impact').classList.add('pre-filled');
+        document.getElementById('badge-cs').style.display = 'inline-block';
+      }
+    }
+  };
+
+  async function generatePRD() {
+    const btn = document.getElementById('generate-btn');
+    const status = document.getElementById('status');
+
+    const fields = {
+      problem_statement: document.getElementById('problem-statement').value.trim(),
+      current_solution: document.getElementById('current-solution').value.trim(),
+      competitive_context: document.getElementById('competitive-context').value.trim(),
+      rbi_requirements: document.getElementById('rbi-requirements').value.trim(),
+      scope: document.getElementById('scope').value.trim(),
+      use_cases: document.getElementById('use-cases').value.trim(),
+      cs_impact: document.getElementById('cs-impact').value.trim(),
+      ops_impact: document.getElementById('ops-impact').value.trim(),
+      metrics: document.getElementById('metrics').value.trim(),
+      rollout: document.getElementById('rollout').value.trim(),
+      reports: document.getElementById('reports').value.trim(),
+      instrumentation: document.getElementById('instrumentation').value.trim()
+    };
+
+    if (!fields.problem_statement) {
+      alert('Please fill in the Problem Statement before generating.');
+      return;
+    }
+
+    btn.disabled = true;
+    status.textContent = 'Generating PRD... this takes 20-30 seconds.';
+
+    try {
+      const res = await fetch('http://localhost:8000/generate-prd-from-form', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fields)
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        status.textContent = 'Error: ' + data.error;
+      } else {
+        document.getElementById('output-body').textContent = data.prd;
+        document.getElementById('output-section').style.display = 'block';
+        document.getElementById('output-section')
+          .scrollIntoView({ behavior: 'smooth' });
+        status.textContent = '';
+        window.generatedPRD = data.prd;
+      }
+    } catch (err) {
+      status.textContent = 'Error reaching server. Is uvicorn running?';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function copyPRD() {
+    if (!window.generatedPRD) return;
+    navigator.clipboard.writeText(window.generatedPRD).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy to clipboard', 2000);
+    });
+  }
+
+  async function downloadDOCX() {
+    if (!window.generatedPRD) return;
+    const btn = document.getElementById('download-btn');
+    btn.disabled = true;
+    btn.textContent = 'Generating Word doc...';
+
+    try {
+      const res = await fetch('http://localhost:8000/download-prd-docx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prd_text: window.generatedPRD })
+      });
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'PIXEL_PRD.docx';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Error generating Word doc. Check server logs.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Download as Word doc';
+    }
+  }
+</script>
+</body>
+</html>
