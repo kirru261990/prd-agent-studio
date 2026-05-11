@@ -741,9 +741,13 @@
       return extractSections(text, sections, 1000);
     }
     if (agentType === 'spec') {
-      const sections = ['FUNCTIONAL USE CASES', 'SCOPE',
+      const sections = ['FUNCTIONAL USE CASES',
         'METRICS IMPACT', 'INSTRUMENTATION'];
-      return extractSections(text, sections, 1200);
+      return extractSections(text, sections, 1500);
+    }
+    if (agentType === 'spec-scope') {
+      const sections = ['SCOPE', 'IN SCOPE', 'OUT OF SCOPE'];
+      return extractSections(text, sections, 800);
     }
     return text.slice(0, 800);
   }
@@ -886,6 +890,20 @@
   function useInPRD(agentType) {
     const content = extractKeyContent(agentType, prdData[agentType + '_analysis']);
     selectedForPRD[agentType] = content;
+
+    // For spec agent extract scope separately for PRD form section 5
+    if (agentType === 'spec') {
+      const specResponse = prdData['spec_analysis']?.response || '';
+      const scopeContent = extractSections(
+        specResponse,
+        ['SCOPE', 'IN SCOPE', 'OUT OF SCOPE'],
+        800
+      );
+      if (scopeContent) {
+        selectedForPRD['spec_scope'] = scopeContent;
+      }
+    }
+
     localStorage.setItem('prd_studio_selections',
       JSON.stringify(selectedForPRD));
     localStorage.setItem('prd_studio_feature',

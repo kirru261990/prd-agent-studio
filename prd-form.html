@@ -397,6 +397,11 @@
         document.getElementById('badge-spec').style.display = 'inline-block';
       }
 
+      if (selections.spec_scope) {
+        document.getElementById('scope').value = selections.spec_scope;
+        document.getElementById('scope').classList.add('pre-filled');
+      }
+
       if (selections.cs) {
         document.getElementById('cs-impact').value = selections.cs;
         document.getElementById('cs-impact').classList.add('pre-filled');

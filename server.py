@@ -154,7 +154,36 @@ Return exactly this JSON structure:
         return json.loads(response)
     except Exception as e:
         return {}
+    
+def extract_summary(response_text: str) -> list:
+    """Extract the 3 bullet point summary — always from the LAST SUMMARY block."""
+    lines = response_text.split('\n')
 
+    # Find the LAST occurrence of a SUMMARY header
+    last_summary_idx = -1
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if 'SUMMARY' in stripped.upper() and len(stripped) < 30:
+            last_summary_idx = i
+
+    if last_summary_idx == -1:
+        return []
+
+    # Extract bullets from after the last SUMMARY header
+    summary_bullets = []
+    for line in lines[last_summary_idx + 1:]:
+        stripped = line.strip()
+        if stripped.startswith('##') or stripped.startswith('---'):
+            break
+        if stripped.startswith('-') or stripped.startswith('•'):
+            bullet = stripped.lstrip('-•').strip()
+            bullet = bullet.replace('**', '')
+            if bullet and len(bullet) > 20:
+                summary_bullets.append(bullet)
+        if len(summary_bullets) >= 3:
+            break
+
+    return summary_bullets[:3]
 
 @app.get("/health")
 def health():
@@ -228,7 +257,7 @@ def competitor_agent(input: AnalysisInput):
                                       'guideline', 'circular', 'mandate',
                                       'refund', 'bbps', 'autopay'])
 
-    # Build competitor search list
+   # Build competitor search list
     default_competitors = "OneCard Scapia Slice Kreditbee Freo Uni"
     custom_competitors = input.competitors.strip() if input.competitors.strip() else ""
     all_competitors = f"{custom_competitors} {default_competitors}".strip()
@@ -278,10 +307,19 @@ def competitor_agent(input: AnalysisInput):
         max_results=3,
         search_depth="basic",
         include_raw_content=True,
-        days=365,
+        days=365
     )
 
-    # Step 1e: YouTube signal
+    # Step 1e: PIXEL-specific community search
+    pixel_community_results = tavily.search(
+        query=f"HDFC PIXEL credit card {feature_short} user feedback complaint review",
+        max_results=2,
+        search_depth="basic",
+        include_raw_content=True,
+        days=365
+    )
+
+    # Step 1f: YouTube signal
     youtube_results = tavily.search(
         query=f"youtube {feature_short} credit card India review explained 2024",
         max_results=2,
@@ -289,10 +327,10 @@ def competitor_agent(input: AnalysisInput):
         include_raw_content=True,
         days=365,
     )
-    
 
-   # Deduplicate all results
+    # Deduplicate all results — PIXEL feedback first for relevance
     all_results = (
+        pixel_community_results.get('results', []) +
         discovery_results.get('results', []) +
         competitor_results.get('results', []) +
         legacy_results.get('results', []) +
@@ -416,7 +454,14 @@ Pick the strongest angle for PIXEL's current stage and constraints.
 - Why not the others: (1 sentence each explaining the tradeoff)
 
 OVERALL CONFIDENCE: High / Medium / Low
-Reason: (1 sentence)"""
+Reason: (2 sentence)
+
+SUMMARY:
+Output EXACTLY 3 lines. Each line MUST start with a hyphen and space "- ".
+No bold text. No markdown. Plain text only. Max 15 words per line.
+- [most important competitive finding]
+- [most important implication for PIXEL]
+- [confidence level and biggest caveat]"""
 
     message = client.messages.create(
         model="claude-sonnet-4-5",
@@ -443,7 +488,8 @@ Reason: (1 sentence)"""
         "rbi_triggered": is_rbi_feature,
         "qa_history": input.qa_history,
         "response": response_text,
-        "options": options
+        "options": options,
+        "summary": extract_summary(response_text)
     }
 
     # Save analysis
@@ -451,7 +497,6 @@ Reason: (1 sentence)"""
     result["saved_to"] = saved_path
 
     return result
-    
 
 # ============================================================
 # CS AGENT
@@ -487,6 +532,16 @@ def load_prd_context(feature_name: str) -> str:
     for prd_file in prd_files:
         filename_lower = prd_file.name.lower()
         score = sum(1 for kw in feature_keywords if kw in filename_lower)
+        # Also check first 300 chars of file content for better matching
+        try:
+            from docx import Document as DocxDoc
+            doc = DocxDoc(prd_file)
+            first_text = " ".join([p.text for p in doc.paragraphs
+                                   if p.text.strip()][:10]).lower()
+            content_score = sum(1 for kw in feature_keywords if kw in first_text)
+            score = score + (content_score * 2)  # weight content match higher
+        except Exception:
+            pass
         if score > best_score:
             best_score = score
             best_file = prd_file
@@ -512,8 +567,21 @@ def cs_agent(input: CSInput):
     enriched_description = f"{input.feature_description}\n{qa_context}"
     feature_short = input.feature_name[:100]
 
-    # Load relevant PRD
-    prd_context = load_prd_context(input.feature_name)
+    # Load relevant PRD — only use if genuinely relevant
+    prd_context_raw = load_prd_context(input.feature_name)
+    
+    # Check if the PRD loaded is actually relevant to this feature
+    feature_keywords = [w.lower() for w in input.feature_name.split()
+                       if len(w) > 3 and w.lower() not in
+                       ['pixel', 'play', 'credit', 'card', 'users', 'hdfc']]
+    
+    prd_first_line = prd_context_raw.split('\n')[0].lower()
+    prd_relevant = any(kw in prd_first_line for kw in feature_keywords)
+    
+    if prd_relevant and prd_context_raw != "No PRDs found in data/prds directory." and prd_context_raw != "No PRD files found.":
+        prd_context = f"RELEVANT PRD FOUND:\n{prd_context_raw}"
+    else:
+        prd_context = "No relevant PRD found for this feature. Base your CS analysis on industry best practices and the feature description provided."
 
     # Detect RBI feature
     is_rbi_feature = any(word in enriched_description.lower()
@@ -646,11 +714,18 @@ For each opportunity:
 - Complexity: Low / Medium / High
 
 OVERALL CS READINESS SCORE: X/10
-Reason: (2 sentences — what's good, what's missing)"""
+Reason: (2 sentences — what's good, what's missing)
+
+SUMMARY:
+Output EXACTLY 3 lines. Each line MUST start with a hyphen and space "- ".
+No bold text. No markdown. Plain text only. Max 15 words per line.
+- [most important competitive finding]
+- [most important implication for PIXEL]
+- [confidence level and biggest caveat]"""
 
     message = client.messages.create(
         model="claude-sonnet-4-5",
-        max_tokens=3000,
+        max_tokens=4000,
         temperature= 0.0,
         system=[
             {
@@ -673,7 +748,8 @@ Reason: (2 sentences — what's good, what's missing)"""
         "rbi_triggered": is_rbi_feature,
         "qa_history": input.qa_history,
         "response": response_text,
-        "options": options
+        "options": options,
+        "summary": extract_summary(response_text)
     }
 
     saved_path = save_analysis(input.feature_name + "_cs", result)
@@ -1011,7 +1087,14 @@ List any compliance requirement that MUST be met before this feature can go live
 If none: state "No mandatory compliance blockers identified in available documents."
 
 OVERALL COMPLIANCE RISK: Low / Medium / High
-Reason: (2 sentences)"""
+Reason: (2 sentences)
+
+SUMMARY:
+Output EXACTLY 3 lines. Each line MUST start with a hyphen and space "- ".
+No bold text. No markdown. Plain text only. Max 15 words per line.
+- [most important competitive finding]
+- [most important implication for PIXEL]
+- [confidence level and biggest caveat]"""
 
     message = client.messages.create(
         model="claude-sonnet-4-5",
@@ -1034,7 +1117,8 @@ Reason: (2 sentences)"""
         "feature_name": input.feature_name,
         "timestamp": datetime.now().isoformat(),
         "rbi_sections_found": relevant_rbi != "No specific RBI section found for this feature.",
-        "response": response_text
+        "response": response_text,
+        "summary": extract_summary(response_text)
     }
 
     saved_path = save_analysis(input.feature_name + "_compliance", result)
@@ -1248,11 +1332,20 @@ INSTRUMENTATION REQUIREMENTS (maximum 5 key events only):
 - Event name: [follow naming convention from reference doc]
 - Trigger: [exactly when this fires]
 - Properties: [key-value pairs to capture]
-- Purpose: [what decision this informs]"""
+- Purpose: [what decision this informs]
+
+SUMMARY:
+Output EXACTLY 3 lines. Each line MUST start with a hyphen and space "- ".
+No bold text. No markdown. Plain text only. Max 15 words per line.
+- [number of use cases and their priority levels]
+- [most important metric with baseline and target]
+- [biggest scope gap or assumption needing PM validation]
+
+INSTRUMENTATION REQUIREMENTS (maximum 5 key events only):"""
 
     message = client.messages.create(
         model="claude-sonnet-4-5",
-        max_tokens=4000,
+        max_tokens=5000,
         temperature=0.0,
         system=[
             {
@@ -1271,7 +1364,8 @@ INSTRUMENTATION REQUIREMENTS (maximum 5 key events only):
         "feature_name": input.feature_name,
         "timestamp": datetime.now().isoformat(),
         "sop_used": sop_context.split('\n')[0],
-        "response": response_text
+        "response": response_text,
+        "summary": extract_summary(response_text)
     }
 
     saved_path = save_analysis(input.feature_name + "_spec", result)
@@ -1408,7 +1502,7 @@ No generic platitudes. No filler."""
 
     message = client.messages.create(
         model="claude-sonnet-4-5",
-        max_tokens=4000,
+        max_tokens=8000,
         temperature=0.0,
         system=f"You are an Associate Director of Products at HDFC PIXEL Studio writing production-grade PRDs for Indian fintech credit card products.\n\n{pixel_context}",
         messages=[{"role": "user", "content": prompt}]
