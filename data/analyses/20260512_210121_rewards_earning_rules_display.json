@@ -1,0 +1,44 @@
+{
+  "agent": "competitor",
+  "feature_name": "Rewards earning rules display",
+  "timestamp": "2026-05-12T21:01:21.391199",
+  "sources_searched": 19,
+  "rbi_triggered": false,
+  "qa_history": [],
+  "response": "COMPETITORS:\n1. OneCard | OneCard Credit Card [DIGITAL-FIRST]\n   - Why relevant: Digital-first card with app-based rewards tracking and category-based accelerated earning\n   - What they built: Regular rewards at 1 RP/Rs with 5X RP on top 2 spending categories, displayed through their app interface. The app shows category-based reward acceleration but search results indicate the regular reward rate is \"too low\" with targeted offers appearing periodically.\n   - One key point: Users can see accelerated rewards on top 2 categories but the base rewards structure is considered weak by reviewers.\n   - Confidence: Medium (inferred from app-based interface mentions)\n   - Source: https://www.cardexpert.in/onecard-review/ and https://cardmaven.in/onecard-review-ltf-metal-credit-card-in-india/\n\n2. Scapia | Federal Scapia Credit Card [DIGITAL-FIRST]\n   - Why relevant: Travel-focused digital card with app-based rewards earning and redemption transparency\n   - What they built: Users earn Scapia coins with every purchase, with 20% accelerated earning on travel bookings made through the Scapia app. The card works through an app interface where rewards are tracked and redeemed for travel.\n   - One key point: The app-based model shows accelerated earning rates specifically for travel category bookings made in-app.\n   - Confidence: Medium (inferred from app-based rewards system)\n   - Source: https://www.paisabazaar.com/federal-bank/scapia-credit-card/ and https://1finance.co.in/blog/scapia-federal-credit-card-review-travel/\n\nWHITESPACE SIGNAL:\nFIRST-MOVER OPPORTUNITY: No competitor found explicitly showing users transaction-level explanations of why specific cashback rates were earned post-transaction.\n\nWHAT REAL USERS SAY:\nNo community signal found in current sources.\n\nGLOBAL BEST PRACTICES SUMMARY:\nRevolut launched RevPoints in 2024 as their first pan-European debit rewards program, demonstrating global fintech movement toward transparent, app-based rewards systems. Their approach focuses on continuous product innovation with \"Money Health Tools\" and technology-driven features that meet evolving customer needs. The annual reports emphasize customer-centric strategies and innovative product offerings as key differentiators, suggesting that transparent rewards communication is part of broader financial wellness positioning.\n\nSource: https://assets.revolut.com/pdf/annualreport2025.pdf and https://zaguan.unizar.es/record/153997/files/TAZ-TFG-2024-1718.pdf\n\nDIFFERENTIATION HYPOTHESES:\n\n**Angle 1: Zero-UI Instant Notifications**\n- What to build: Push notification immediately after each transaction showing exact cashback earned and the rule that triggered it (e.g., \"\u20b912 cashback earned: 2% on gaming purchases\")\n- Strategic logic: Solve the transparency problem with minimal user effort through passive consumption rather than requiring users to navigate app sections.\n- RBI compliance: Standard transaction notification rules apply; no additional compliance burden.\n- Build complexity: Low\n- Ops impact: Requires real-time rule engine integration with notification service but no customer support infrastructure changes.\n\n**Angle 2: Gamified Rewards Intelligence**\n- What to build: Interactive \"Rewards Lab\" in-app section where users can simulate future purchases to see potential cashback, compare category rates, and get AI-powered spending recommendations to maximize earnings.\n- Strategic logic: Transform rewards from passive receipt to active engagement tool, creating stickiness through financial planning utility rather than just transparency.\n- RBI compliance: Must ensure recommendations don't constitute financial advice; disclosures required for simulated projections.\n- Build complexity: High\n- Ops impact: Requires ongoing content updates, AI model maintenance, and potential customer queries about recommendation accuracy.\n\n**Angle 3: Transaction Receipt Breakdown**\n- What to build: Detailed transaction screen showing cashback calculation breakdown (base rate + bonus + category multiplier) with one-tap access to full rewards T&Cs for that specific transaction type.\n- Strategic logic: Build trust through forensic-level transparency for power users who want to verify earnings, positioning PIXEL as the \"honest broker\" in a market where reward devaluations are common.\n- RBI compliance: Aligns with fair practice code requirements for transparent fee and charge disclosure.\n- Build complexity: Medium\n- Ops impact: Reduces support tickets about \"missing\" cashback by providing self-service verification; requires comprehensive T&C linking infrastructure.\n\nRECOMMENDED ANGLE:\n- Which angle: Zero-UI Instant Notifications\n- Why now: PIXEL is on Zeta's Tachyon platform which likely has real-time transaction processing infrastructure already built; leveraging existing notification rails is fastest path to differentiation without heavy engineering lift.\n- Why not the others: Gamified Rewards Intelligence requires AI/ML capabilities and ongoing content operations that may exceed current team capacity; Transaction Receipt Breakdown solves for power users but doesn't create the \"wow moment\" for mass market users who won't drill into transaction details.\n\nOVERALL CONFIDENCE: Medium\nReason: Found two digital-first competitors with app-based rewards systems but no evidence of transaction-level earning explanations. Industry trend toward rewards devaluation creates user demand for transparency, but limited direct competitive intelligence on this specific feature.\n\nSUMMARY:\n- OneCard and Scapia show category rewards in apps but not transaction level explanations\n- First mover opportunity exists for post transaction cashback earning rule transparency notifications\n- Medium confidence due to limited search results on exact feature implementation details",
+  "options": {
+    "section": "differentiation",
+    "agent": "competitor",
+    "choices": [
+      {
+        "id": "angle_1",
+        "title": "Zero-UI Instant Notifications",
+        "summary": "Push notification immediately after each transaction showing exact cashback earned and the rule that triggered it.",
+        "rationale": "Solves transparency problem with minimal user effort through passive consumption rather than requiring app navigation.",
+        "complexity": "Low",
+        "recommended": true
+      },
+      {
+        "id": "angle_2",
+        "title": "Transaction-Level Explanations",
+        "summary": "Post-transaction interface showing detailed breakdown of why specific cashback rates were earned for each purchase.",
+        "rationale": "Addresses first-mover whitespace opportunity where no competitor explicitly shows transaction-level cashback explanations.",
+        "complexity": "Medium",
+        "recommended": false
+      },
+      {
+        "id": "angle_3",
+        "title": "Category Acceleration Transparency",
+        "summary": "Real-time app dashboard displaying current top spending categories with accelerated rewards rates and progress tracking.",
+        "rationale": "Improves upon OneCard's weak base rewards structure by making category-based acceleration more visible and actionable.",
+        "complexity": "Medium",
+        "recommended": false
+      }
+    ]
+  },
+  "summary": [
+    "OneCard and Scapia show category rewards in apps but not transaction level explanations",
+    "First mover opportunity exists for post transaction cashback earning rule transparency notifications",
+    "Medium confidence due to limited search results on exact feature implementation details"
+  ]
+}

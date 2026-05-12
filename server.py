@@ -87,6 +87,46 @@ def load_pixel_context() -> str:
     context_path = Path("pixel-context-private.md")
     return context_path.read_text() if context_path.exists() else ""
 
+def load_pixel_context_competitor() -> str:
+    """Minimal PIXEL context for competitor agent."""
+    ctx = load_pixel_context()
+    if not ctx:
+        return ""
+    lines = ctx.split('\n')
+    relevant = [l for l in lines if any(kw in l.lower() for kw in
+        ['customer', 'demographic', 'better', 'advantage', 'technical', 'reward', 'merchant'])]
+    return '\n'.join(relevant[:20])
+
+def load_pixel_context_cs() -> str:
+    """Minimal PIXEL context for CS agent."""
+    ctx = load_pixel_context()
+    if not ctx:
+        return ""
+    lines = ctx.split('\n')
+    relevant = [l for l in lines if any(kw in l.lower() for kw in
+        ['customer', 'support', 'ticket', 'constraint', 'limitation', 'ops', 'manual'])]
+    return '\n'.join(relevant[:20])
+
+def load_pixel_context_compliance() -> str:
+    """Minimal PIXEL context for compliance agent."""
+    ctx = load_pixel_context()
+    if not ctx:
+        return ""
+    lines = ctx.split('\n')
+    relevant = [l for l in lines if any(kw in l.lower() for kw in
+        ['rbi', 'regulatory', 'bank', 'hdfc', 'constraint', 'bsg', 'compliance'])]
+    return '\n'.join(relevant[:20])
+
+def load_pixel_context_spec() -> str:
+    """Minimal PIXEL context for spec agent."""
+    ctx = load_pixel_context()
+    if not ctx:
+        return ""
+    lines = ctx.split('\n')
+    relevant = [l for l in lines if any(kw in l.lower() for kw in
+        ['technical', 'tachyon', 'api', 'limitation', 'cannot', 'architecture', 'config'])]
+    return '\n'.join(relevant[:20])
+
 
 def save_analysis(feature_name: str, result: dict):
     output_dir = Path("data/analyses")
@@ -185,6 +225,21 @@ def extract_summary(response_text: str) -> list:
 
     return summary_bullets[:3]
 
+def filter_search_results(results: list, keywords: list, max_chars_per_result: int = 400) -> str:
+    """Filter search results to only relevant sentences before passing to Claude."""
+    filtered = []
+    for r in results:
+        url = r.get('url', '')
+        content = r.get('raw_content') or r.get('content') or ''
+        sentences = [s.strip() for s in content.replace('\n', '. ').split('.') if len(s.strip()) > 20]
+        relevant = [s for s in sentences if any(kw in s.lower() for kw in keywords)]
+        if not relevant:
+            relevant = sentences[:3]
+        chunk = '. '.join(relevant[:4])[:max_chars_per_result]
+        if chunk:
+            filtered.append(f"Source: {url}\n{chunk}")
+    return '\n\n'.join(filtered)
+
 @app.get("/health")
 def health():
     return {"status": "running", "agent": "prd-agent-studio"}
@@ -194,7 +249,7 @@ def health():
 def clarify(input: ClarifyInput):
     """Generate next clarifying question or signal READY if enough context."""
 
-    pixel_context = load_pixel_context()
+    pixel_context = load_pixel_context_competitor()
     qa_so_far = format_qa_history(input.qa_history)
     question_number = len(input.qa_history) + 1
 
@@ -361,10 +416,8 @@ def competitor_agent(input: AnalysisInput):
     if not filtered_results:
         filtered_results = unique_results  # fallback if all filtered out
 
-    competitor_context = "\n\n".join([
-       f"Source: {r['url']}\n{(r.get('raw_content') or r.get('content') or '')[:2000]}"
-        for r in filtered_results[:8]
-    ])
+    search_keywords = [w.lower() for w in feature_short.split() if len(w) > 3]
+    competitor_context = filter_search_results(filtered_results, search_keywords)
 
     # Step 2: RBI or global context
     if is_rbi_feature:
@@ -391,11 +444,8 @@ FEATURE NAME: {input.feature_name}
 FEATURE DESCRIPTION: {input.feature_description}
 {qa_context}
 
-IMPORTANT RULES:
-- HDFC Bank, HDFC PIXEL Play, and PayZapp are the products we are BUILDING — never list them as competitors
-- Use ONLY the search results below — do not use training memory
-- If something is not in sources, say "not found in current sources"
-- Competitor priority: Digital-first cards (OneCard, Scapia, Slice) → Legacy banks (ICICI, Axis, Kotak) → NBFCs/Fintechs (KreditBee, Freo)
+Use ONLY the search results below. If not found, say so.
+Competitor priority: Digital-first (OneCard, Scapia, Slice) → Legacy banks → NBFCs
 
 SEARCH RESULTS:
 {competitor_context}
@@ -470,7 +520,7 @@ No bold text. No markdown. Plain text only. Max 15 words per line.
         system=[
             {
                 "type": "text",
-                "text": f"You are a senior competitive intelligence analyst for HDFC PIXEL Studio. HDFC Bank, PIXEL Play, and PayZapp are the products being built — never list them as competitors.\n\nPIXEL Studio context:\n{pixel_context}",
+                "text": f"You are a competitive intelligence analyst for PIXEL Play, HDFC's digital credit card on Zeta's Tachyon platform. Never list HDFC, PIXEL Play, or PayZapp as competitors.\n\n{pixel_context}",
                 "cache_control": {"type": "ephemeral"}
             }
         ],
@@ -562,7 +612,7 @@ def load_prd_context(feature_name: str) -> str:
 @app.post("/cs-agent")
 def cs_agent(input: CSInput):
 
-    pixel_context = load_pixel_context()
+    pixel_context = load_pixel_context_cs()
     qa_context = format_qa_history(input.qa_history)
     enriched_description = f"{input.feature_description}\n{qa_context}"
     feature_short = input.feature_name[:100]
@@ -616,21 +666,10 @@ def cs_agent(input: CSInput):
         days=365,
     )
 
-    # Format search results
-    cx_context = "\n\n".join([
-        f"Source: {r['url']}\n{r['content']}"
-        for r in cx_results.get('results', [])
-    ])
-
-    complaint_context = "\n\n".join([
-        f"Source: {r['url']}\n{r['content']}"
-        for r in complaint_results.get('results', [])
-    ])
-
-    global_cx_context = "\n\n".join([
-        f"Source: {r['url']}\n{r['content']}"
-        for r in global_cx_results.get('results', [])
-    ])
+    cs_keywords = [w.lower() for w in input.feature_name.split() if len(w) > 3]
+    cx_context = filter_search_results(cx_results.get('results', []), cs_keywords)
+    complaint_context = filter_search_results(complaint_results.get('results', []), cs_keywords)
+    global_cx_context = filter_search_results(global_cx_results.get('results', []), cs_keywords)
 
     # RBI context if applicable
     rbi_context = ""
@@ -1017,7 +1056,7 @@ def extract_relevant_rbi_sections(feature_description: str, full_rbi_text: str) 
 @app.post("/compliance-agent")
 def compliance_agent(input: ComplianceInput):
 
-    pixel_context = load_pixel_context()
+    pixel_context = load_pixel_context_compliance()
     qa_context = format_qa_history(input.qa_history)
     enriched_description = f"{input.feature_description}\n{qa_context}"
 
@@ -1219,7 +1258,7 @@ def load_instrumentation_reference() -> str:
 @app.post("/spec-agent")
 def spec_agent(input: SpecInput):
 
-    pixel_context = load_pixel_context()
+    pixel_context = load_pixel_context_spec()
     qa_context = format_qa_history(input.qa_history)
     enriched_description = f"{input.feature_description}\n{qa_context}"
     feature_short = input.feature_name[:80]
