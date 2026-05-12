@@ -6,157 +6,292 @@
   <title>PRD Agent Studio</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f5f5f0;
-      color: #1a1a1a;
-      padding: 32px 20px;
+      background: #f0f4f8;
+      color: #0f172a;
+      min-height: 100vh;
     }
-    .container { max-width: 860px; margin: 0 auto; }
 
-    .top-bar {
+    /* Top nav */
+    .nav {
+      background: #0f172a;
+      padding: 0 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 24px;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    .top-bar h1 { font-size: 20px; font-weight: 600; }
-    .top-bar p { font-size: 13px; color: #888; margin-top: 2px; }
-
-    .open-prd-btn {
-      padding: 9px 20px;
-      background: #1a1a1a;
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-logo {
+      width: 28px;
+      height: 28px;
+      background: #0d9488;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+    }
+    .nav-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+    }
+    .nav-subtitle {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-left: 4px;
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-prd-btn {
+      padding: 7px 16px;
+      background: #0d9488;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      white-space: nowrap;
+      display: none;
+      transition: background 0.15s;
     }
-    .open-prd-btn:hover { background: #333; }
+    .nav-prd-btn:hover { background: #0f766e; }
+    .nav-prd-btn.visible { display: block; }
 
+    /* Main layout */
+    .main { max-width: 900px; margin: 0 auto; padding: 28px 20px; }
+
+    /* Cards */
     .card {
       background: white;
       border-radius: 12px;
-      padding: 20px 24px;
+      padding: 22px 24px;
       margin-bottom: 14px;
-      border: 1px solid #e5e5e0;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
 
-    .step-label {
+    .section-label {
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #888;
+      color: #64748b;
       margin-bottom: 14px;
     }
 
     label {
       font-size: 13px;
       font-weight: 500;
-      color: #444;
+      color: #475569;
       display: block;
       margin-bottom: 5px;
-      margin-top: 12px;
+      margin-top: 14px;
     }
     label:first-of-type { margin-top: 0; }
 
     input[type="text"], textarea {
       width: 100%;
       padding: 9px 12px;
-      border: 1px solid #ddd;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 13px;
       font-family: inherit;
       outline: none;
-      background: #fafafa;
+      background: #f8fafc;
+      color: #0f172a;
+      transition: border-color 0.15s;
     }
     input[type="text"]:focus, textarea:focus {
-      border-color: #888;
+      border-color: #0d9488;
       background: white;
     }
-    textarea { resize: vertical; }
+    textarea { resize: vertical; line-height: 1.6; }
 
-    .btn {
-      margin-top: 14px;
-      padding: 9px 22px;
-      background: #1a1a1a;
+    /* Agent checkboxes */
+    .agent-selector { margin-top: 18px; }
+    .agent-selector-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+    .agent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: stretch; }
+
+    .agent-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      cursor: pointer;
+      background: white;
+      transition: all 0.15s;
+      user-select: none;
+      min-height: 60px;
+    }
+    .agent-checkbox:hover { border-color: #0d9488; background: #f0fdfa; }
+    .agent-checkbox.checked { border-color: #0d9488; background: #f0fdfa; }
+
+    .checkbox-box {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 4px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .agent-checkbox.checked .checkbox-box {
+      background: #0d9488;
+      border-color: #0d9488;
+    }
+    .checkmark {
+      width: 9px;
+      height: 9px;
+      fill: none;
+      stroke: white;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .agent-checkbox.checked .checkmark { opacity: 1; }
+    .agent-name { font-size: 13px; font-weight: 500; color: #0f172a; }
+    .agent-desc { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+
+    .select-all-link {
+      font-size: 11px;
+      color: #0d9488;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    /* Start button */
+    .start-btn {
+      margin-top: 18px;
+      width: 100%;
+      padding: 12px;
+      background: #0f172a;
       color: white;
       border: none;
       border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
+      transition: background 0.15s;
+      letter-spacing: 0.01em;
     }
-    .btn:hover { background: #333; }
-    .btn:disabled { background: #bbb; cursor: not-allowed; }
+    .start-btn:hover { background: #1e293b; }
+    .start-btn:disabled { background: #94a3b8; cursor: not-allowed; }
 
-    .btn-secondary {
-      background: white;
-      color: #1a1a1a;
-      border: 1px solid #ddd;
-      margin-left: 8px;
-    }
-    .btn-secondary:hover { background: #f5f5f0; }
-
+    /* Question card */
     .question-card {
-      background: #f0f7ff;
-      border: 1px solid #c8e0ff;
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
       border-radius: 12px;
       padding: 18px 22px;
       margin-bottom: 14px;
     }
-    .q-counter { font-size: 11px; color: #888; margin-bottom: 6px; }
-    .question-text {
-      font-size: 15px;
-      font-weight: 500;
-      margin-bottom: 10px;
-      line-height: 1.5;
-    }
+    .q-counter { font-size: 11px; color: #0f766e; margin-bottom: 6px; font-weight: 500; }
+    .question-text { font-size: 15px; font-weight: 500; margin-bottom: 10px; line-height: 1.5; color: #0f172a; }
+    .progress-bar { height: 3px; background: #e2e8f0; border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
+    .progress-fill { height: 100%; background: #0d9488; border-radius: 2px; transition: width 0.3s ease; }
 
-    .progress-bar {
-      height: 3px;
-      background: #e5e5e0;
-      border-radius: 2px;
-      margin-bottom: 14px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: #1a1a1a;
-      border-radius: 2px;
-      transition: width 0.3s ease;
-    }
-
-    .loading {
+    .btn-row { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-primary {
+      padding: 8px 20px;
+      background: #0f172a;
+      color: white;
+      border: none;
+      border-radius: 7px;
       font-size: 13px;
-      color: #888;
-      margin-top: 10px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-secondary {
+      padding: 8px 16px;
+      background: white;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .loading-text { font-size: 12px; color: #94a3b8; margin-top: 8px; display: none; }
+
+    /* Loading agents */
+    .loading-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      padding: 20px 24px;
+      margin-bottom: 14px;
       display: none;
     }
+    .agents-running { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .agent-pill-running {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: #f1f5f9;
+      color: #64748b;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
     /* Results tabs */
     .results-container {
       background: white;
       border-radius: 12px;
-      border: 1px solid #e5e5e0;
+      border: 1px solid #e2e8f0;
       margin-bottom: 14px;
       display: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
 
     .tab-bar {
       display: flex;
-      border-bottom: 1px solid #e5e5e0;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 8px;
       overflow-x: auto;
+      background: #f8fafc;
+      border-radius: 12px 12px 0 0;
     }
 
     .tab-btn {
-      padding: 12px 18px;
+      padding: 11px 16px;
       font-size: 13px;
       font-weight: 500;
-      color: #888;
+      color: #64748b;
       border: none;
       background: none;
       cursor: pointer;
@@ -165,776 +300,720 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      transition: color 0.15s;
+      margin-bottom: -1px;
     }
-    .tab-btn:hover { color: #1a1a1a; }
-    .tab-btn.active {
-      color: #1a1a1a;
-      border-bottom-color: #1a1a1a;
-    }
-    .tab-btn .badge {
+    .tab-btn:hover { color: #0f172a; }
+    .tab-btn.active { color: #0d9488; border-bottom-color: #0d9488; }
+    .tab-btn.done::after { content: ' ✓'; color: #0d9488; font-size: 11px; }
+
+    .risk-badge {
       font-size: 10px;
       font-weight: 600;
-      padding: 2px 6px;
+      padding: 2px 7px;
       border-radius: 10px;
     }
-    .badge-risk { background: #fff0f0; color: #c00; }
-    .badge-ok { background: #f0fff4; color: #060; }
-    .badge-med { background: #fff8f0; color: #930; }
+    .badge-high { background: #fee2e2; color: #b91c1c; }
+    .badge-med { background: #fef3c7; color: #92400e; }
+    .badge-ok { background: #d1fae5; color: #065f46; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
 
     .tab-panel { display: none; padding: 20px 24px; }
     .tab-panel.active { display: block; }
 
+    /* Summary box */
     .summary-box {
-      background: #f8f8f5;
-      border-left: 3px solid #1a1a1a;
+      background: #f0fdfa;
+      border-left: 3px solid #0d9488;
       border-radius: 0 8px 8px 0;
       padding: 12px 16px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
-    .summary-box p {
-      font-size: 13px;
-      line-height: 1.6;
-      color: #333;
-      margin: 0;
-    }
-    .summary-box .summary-label {
+    .summary-title {
       font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #888;
-      margin-bottom: 6px;
+      color: #0f766e;
+      margin-bottom: 8px;
+    }
+    .summary-items { display: flex; flex-direction: column; gap: 5px; }
+    .summary-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #0f172a;
+      line-height: 1.4;
+    }
+    .summary-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #0d9488;
+      margin-top: 5px;
+      flex-shrink: 0;
     }
 
-    .agent-meta {
-      font-size: 12px;
-      color: #aaa;
-      margin-bottom: 14px;
-    }
+    .agent-meta { font-size: 11px; color: #94a3b8; margin-bottom: 12px; }
 
-    .tags { margin-bottom: 12px; }
+    /* Tags */
+    .tags { margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 5px; }
     .tag {
-      display: inline-block;
       font-size: 11px;
       font-weight: 500;
-      padding: 3px 10px;
+      padding: 3px 9px;
       border-radius: 20px;
-      margin-right: 6px;
-      margin-bottom: 4px;
     }
-    .tag-default { background: #f0f0eb; color: #444; }
-    .tag-rbi { background: #fff0f0; color: #c00; }
-    .tag-saved { background: #f0fff4; color: #060; }
-    .tag-cs { background: #f0f0ff; color: #339; }
-    .tag-competitor { background: #fff8f0; color: #930; }
+    .tag-teal { background: #ccfbf1; color: #0f766e; }
+    .tag-red { background: #fee2e2; color: #b91c1c; }
+    .tag-green { background: #d1fae5; color: #065f46; }
+    .tag-blue { background: #dbeafe; color: #1e40af; }
+    .tag-gray { background: #f1f5f9; color: #475569; }
 
-    .agent-output {
-      font-size: 13px;
-      line-height: 1.8;
-      color: #1a1a1a;
-      white-space: pre-wrap;
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid #e5e5e0;
-      border-radius: 8px;
-      padding: 14px;
-      background: #fafafa;
-      margin-bottom: 14px;
-    }
-
-    .use-in-prd-bar {
+    /* Action bar */
+    .action-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 10px 14px;
-      background: #f5f5f0;
+      background: #f8fafc;
       border-radius: 8px;
+      border: 1px solid #e2e8f0;
       margin-bottom: 14px;
     }
-    .use-in-prd-bar p {
+    .action-bar-text { font-size: 12px; color: #64748b; }
+    .action-btns { display: flex; gap: 8px; }
+
+    .copy-btn {
+      padding: 6px 14px;
+      background: white;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
       font-size: 12px;
-      color: #666;
-      margin: 0;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
     }
+    .copy-btn:hover { border-color: #0d9488; color: #0d9488; }
+
     .use-btn {
-      padding: 7px 16px;
-      background: #1a1a1a;
+      padding: 6px 14px;
+      background: #0f172a;
       color: white;
       border: none;
       border-radius: 6px;
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
+      transition: background 0.15s;
     }
-    .use-btn:hover { background: #333; }
-    .use-btn.used {
-      background: #060;
-      cursor: default;
+    .use-btn:hover { background: #1e293b; }
+    .use-btn.used { background: #0d9488; }
+
+    /* Agent output */
+    .agent-output {
+      font-size: 12px;
+      line-height: 1.8;
+      color: #334155;
+      white-space: pre-wrap;
+      max-height: 380px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px;
+      background: #f8fafc;
     }
 
+    /* Options */
     .options-heading {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
-      color: #444;
-      margin-bottom: 10px;
       text-transform: uppercase;
       letter-spacing: 0.06em;
+      color: #64748b;
+      margin: 16px 0 8px;
     }
-
     .options-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .option-card {
-      background: white;
-      border: 1px solid #e5e5e0;
-      border-radius: 10px;
-      padding: 14px;
-      cursor: pointer;
-      transition: border-color 0.15s;
-    }
-    .option-card:hover { border-color: #888; }
-    .option-card.selected { border: 2px solid #1a1a1a; }
-    .option-card.recommended { border-color: #c8e0ff; background: #f8fbff; }
-    .option-card.recommended.selected { border: 2px solid #1a1a1a; }
-
-    .rec-badge {
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #0066cc;
+      gap: 8px;
       margin-bottom: 4px;
     }
-    .option-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-    .option-summary { font-size: 11px; color: #666; line-height: 1.5; margin-bottom: 6px; }
-    .option-meta { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
-    .option-tag {
-      font-size: 10px;
-      background: #f0f0eb;
-      color: #666;
-      padding: 2px 7px;
-      border-radius: 20px;
+    @media (max-width: 640px) {
+      .options-grid { grid-template-columns: 1fr; }
     }
-    .option-rationale { font-size: 11px; color: #888; line-height: 1.4; font-style: italic; }
-
-    /* Step 3 loading */
-    .loading-card {
+    .option-card {
       background: white;
-      border-radius: 12px;
-      border: 1px solid #e5e5e0;
-      padding: 20px 24px;
-      margin-bottom: 14px;
-      display: none;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
     }
-    .agents-running { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-    .agent-pill {
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-      background: #f0f0eb;
-      color: #888;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
+    .option-card:hover { border-color: #0d9488; }
+    .option-card.selected { border: 2px solid #0d9488; background: #f0fdfa; }
+    .option-card.recommended { border-color: #99f6e4; background: #f0fdfa; }
+    .option-card.recommended.selected { border: 2px solid #0d9488; }
+    .rec-badge { font-size: 10px; font-weight: 600; color: #0d9488; margin-bottom: 3px; }
+    .option-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #0f172a; }
+    .option-summary { font-size: 11px; color: #64748b; line-height: 1.4; margin-bottom: 6px; }
+    .option-meta { display: flex; gap: 5px; flex-wrap: wrap; }
+    .option-tag { font-size: 10px; background: #f1f5f9; color: #64748b; padding: 2px 7px; border-radius: 20px; }
+    .option-rationale { font-size: 11px; color: #94a3b8; line-height: 1.4; font-style: italic; margin-top: 4px; }
 
     /* Bottom bar */
     .bottom-bar {
       background: white;
       border-radius: 12px;
-      border: 1px solid #e5e5e0;
+      border: 1px solid #e2e8f0;
       padding: 14px 20px;
       display: none;
       align-items: center;
       justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      position: sticky;
+      bottom: 16px;
     }
-    .bottom-bar p { font-size: 13px; color: #666; margin: 0; }
+    .bottom-bar.visible { display: flex; }
+    .bottom-status { font-size: 13px; color: #64748b; }
+    .bottom-status strong { color: #0f172a; }
+    .bottom-prd-btn {
+      padding: 9px 20px;
+      background: #0d9488;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .bottom-prd-btn:hover { background: #0f766e; }
 
     .hidden { display: none; }
   </style>
 </head>
 <body>
-<div class="container">
 
-  <!-- Top bar -->
-  <div class="top-bar">
-    <div>
-      <h1>PRD Agent Studio</h1>
-      <p>Full PRD review powered by Claude — HDFC PIXEL Studio</p>
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="nav-logo">P</div>
+      <span class="nav-title">PRD Agent Studio</span>
+      <span class="nav-subtitle">HDFC PIXEL Studio</span>
     </div>
-    <button class="open-prd-btn" onclick="openPRDGenerator()">
-      Open PRD Generator →
-    </button>
-  </div>
-
-  <!-- Step 1: Input -->
-  <div class="card" id="step1-card">
-    <div class="step-label">Step 1 — describe your feature</div>
-
-    <label>Feature name</label>
-    <input type="text" id="feature-name"
-      placeholder="e.g. Annual Statement for PIXEL Play users"/>
-
-    <label>Feature description</label>
-    <textarea id="feature-input" rows="5"
-      placeholder="Describe the feature in detail — who uses it, what problem it solves, how it works, any thresholds or rules, target segment."></textarea>
-
-    <label>Competitors to check
-      <span style="font-weight:400;color:#aaa">(optional)</span>
-    </label>
-    <input type="text" id="competitors-input"
-      placeholder="e.g. OneCard, Scapia — leave blank for automatic discovery"/>
-
-    <br/>
-    <button class="btn" id="start-btn" onclick="startClarification()">
-      Start PRD review →
-    </button>
-    <p class="loading" id="loading-1">Getting first question...</p>
-  </div>
-
-  <!-- Step 2: Clarifying questions -->
-  <div id="step2-card" class="hidden">
-    <div class="progress-bar">
-      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="question-card">
-      <div class="q-counter" id="q-counter">Question 1 of up to 3</div>
-      <div class="question-text" id="question-text"></div>
-      <textarea id="answer-input" rows="3" placeholder="Your answer..."></textarea>
-      <div>
-        <button class="btn" id="next-btn" onclick="submitAnswer()">Next →</button>
-        <button class="btn btn-secondary" onclick="skipToAnalysis()">Skip to review</button>
-      </div>
-      <p class="loading" id="loading-2">Thinking...</p>
-    </div>
-  </div>
-
-  <!-- Step 3: Loading -->
-  <div class="loading-card" id="step3-card">
-    <div class="step-label">Running full PRD review</div>
-    <p style="font-size:13px;color:#666;">
-      Four agents running in parallel. This takes 30-45 seconds.
-    </p>
-    <div class="agents-running">
-      <div class="agent-pill">🔍 Competitor</div>
-      <div class="agent-pill">💬 CS Impact</div>
-      <div class="agent-pill">⚖️ Compliance</div>
-      <div class="agent-pill">📋 Spec</div>
-    </div>
-  </div>
-
-  <!-- Step 4: Results tabs -->
-  <div class="results-container" id="results-container">
-    <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab('competitor')">
-        🔍 Competitor
-        <span class="badge badge-med" id="tab-badge-competitor"></span>
-      </button>
-      <button class="tab-btn" onclick="switchTab('cs')">
-        💬 CS Impact
-        <span class="badge badge-ok" id="tab-badge-cs"></span>
-      </button>
-      <button class="tab-btn" onclick="switchTab('compliance')">
-        ⚖️ Compliance
-        <span class="badge badge-risk" id="tab-badge-compliance"></span>
-      </button>
-      <button class="tab-btn" onclick="switchTab('spec')">
-        📋 Spec
-        <span class="badge badge-ok" id="tab-badge-spec"></span>
+    <div class="nav-right">
+      <button class="nav-prd-btn" id="nav-prd-btn" onclick="openPRDGenerator()">
+        Open PRD Generator →
       </button>
     </div>
+  </nav>
 
-    <!-- Competitor tab -->
-    <div class="tab-panel active" id="panel-competitor">
-      <div class="tags" id="tags-competitor"></div>
-      <div class="agent-meta" id="meta-competitor"></div>
-      <div class="summary-box" id="summary-competitor">
-        <div class="summary-label">Key takeaways</div>
-        <p id="summary-text-competitor">Loading summary...</p>
-      </div>
-      <div class="use-in-prd-bar">
-        <p>Use competitive intelligence in your PRD</p>
-        <button class="use-btn" id="use-btn-competitor"
-          onclick="useInPRD('competitor')">
-          Use in PRD →
-        </button>
-      </div>
-      <div class="agent-output" id="output-competitor"></div>
-      <div id="options-competitor"></div>
-    </div>
+  <div class="main">
 
-    <!-- CS tab -->
-    <div class="tab-panel" id="panel-cs">
-      <div class="tags" id="tags-cs"></div>
-      <div class="agent-meta" id="meta-cs"></div>
-      <div class="summary-box" id="summary-cs">
-        <div class="summary-label">Key takeaways</div>
-        <p id="summary-text-cs">Loading summary...</p>
-      </div>
-      <div class="use-in-prd-bar">
-        <p>Use CS impact analysis in your PRD</p>
-        <button class="use-btn" id="use-btn-cs"
-          onclick="useInPRD('cs')">
-          Use in PRD →
-        </button>
-      </div>
-      <div class="agent-output" id="output-cs"></div>
-    </div>
+    <!-- Input card -->
+    <div class="card" id="step1-card">
+      <div class="section-label">Describe your feature</div>
 
-    <!-- Compliance tab -->
-    <div class="tab-panel" id="panel-compliance">
-      <div class="tags" id="tags-compliance"></div>
-      <div class="agent-meta" id="meta-compliance"></div>
-      <div class="summary-box" id="summary-compliance">
-        <div class="summary-label">Key takeaways</div>
-        <p id="summary-text-compliance">Loading summary...</p>
-      </div>
-      <div class="use-in-prd-bar">
-        <p>Use RBI compliance analysis in your PRD</p>
-        <button class="use-btn" id="use-btn-compliance"
-          onclick="useInPRD('compliance')">
-          Use in PRD →
-        </button>
-      </div>
-      <div class="agent-output" id="output-compliance"></div>
-    </div>
+      <label>Feature name</label>
+      <input type="text" id="feature-name"
+        placeholder="e.g. Rewards earning rules display for PIXEL Play users"/>
 
-    <!-- Spec tab -->
-    <div class="tab-panel" id="panel-spec">
-      <div class="tags" id="tags-spec"></div>
-      <div class="agent-meta" id="meta-spec"></div>
-      <div class="summary-box" id="summary-spec">
-        <div class="summary-label">Key takeaways</div>
-        <p id="summary-text-spec">Loading summary...</p>
-      </div>
-      <div class="use-in-prd-bar">
-        <p>Use use cases and acceptance criteria in your PRD</p>
-        <button class="use-btn" id="use-btn-spec"
-          onclick="useInPRD('spec')">
-          Use in PRD →
-        </button>
-      </div>
-      <div class="agent-output" id="output-spec"></div>
-    </div>
+      <label>Feature description</label>
+      <textarea id="feature-input" rows="4"
+        placeholder="Describe in detail — who uses it, what problem it solves, how it works, any thresholds or rules, target segment."></textarea>
 
-  </div>
+      <label>Competitors to check
+        <span style="font-weight:400;color:#94a3b8">(optional)</span>
+      </label>
+      <input type="text" id="competitors-input"
+        placeholder="e.g. OneCard, Scapia — leave blank for automatic discovery"/>
 
-  <!-- Bottom bar -->
-  <div class="bottom-bar" id="bottom-bar">
-    <p id="bottom-status">Run a review to get started</p>
-    <button class="open-prd-btn" onclick="openPRDGenerator()">
-      Open PRD Generator →
-    </button>
-  </div>
+      <div class="agent-selector">
+        <div class="agent-selector-label">Agents to run</div>
+        <span class="select-all-link" onclick="toggleAllAgents()">Select all / Deselect all</span>
+        <div class="agent-grid">
 
-</div>
+          <label class="agent-checkbox checked" id="lbl-competitor">
+            <input type="checkbox" id="cb-competitor" checked style="display:none">
+            <div class="checkbox-box">
+              <svg class="checkmark" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+            </div>
+            <div>
+              <div class="agent-name">🔍 Competitor</div>
+              <div class="agent-desc">Web search + whitespace</div>
+            </div>
+          </label>
 
-<script>
-  let qaHistory = [];
-  let currentQuestion = '';
-  let prdData = {};
-  let selectedForPRD = {};
+          <label class="agent-checkbox checked" id="lbl-cs">
+            <input type="checkbox" id="cb-cs" checked style="display:none">
+            <div class="checkbox-box">
+              <svg class="checkmark" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+            </div>
+            <div>
+              <div class="agent-name">💬 CS Impact</div>
+              <div class="agent-desc">Contact drivers + FAQs</div>
+            </div>
+          </label>
 
-  function getInputs() {
-    return {
-      feature_name: document.getElementById('feature-name').value.trim(),
-      feature_description: document.getElementById('feature-input').value.trim(),
-      competitors: document.getElementById('competitors-input').value.trim()
-    };
-  }
+          <label class="agent-checkbox checked" id="lbl-compliance">
+            <input type="checkbox" id="cb-compliance" checked style="display:none">
+            <div class="checkbox-box">
+              <svg class="checkmark" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+            </div>
+            <div>
+              <div class="agent-name">⚖️ Compliance</div>
+              <div class="agent-desc">RBI verbatim + blockers</div>
+            </div>
+          </label>
 
-  function validateStep1() {
-    const { feature_name, feature_description } = getInputs();
-    if (!feature_name || !feature_description) {
-      alert('Please fill in both feature name and description.');
-      return false;
-    }
-    return true;
-  }
+          <label class="agent-checkbox checked" id="lbl-spec">
+            <input type="checkbox" id="cb-spec" checked style="display:none">
+            <div class="checkbox-box">
+              <svg class="checkmark" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+            </div>
+            <div>
+              <div class="agent-name">📋 Spec</div>
+              <div class="agent-desc">Use cases + ACs + metrics</div>
+            </div>
+          </label>
 
-  function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    document.getElementById('panel-' + tab).classList.add('active');
-  }
-
-  async function startClarification() {
-    if (!validateStep1()) return;
-    const btn = document.getElementById('start-btn');
-    const loading = document.getElementById('loading-1');
-    btn.disabled = true;
-    loading.style.display = 'block';
-    const inputs = getInputs();
-    try {
-      const res = await fetch('http://localhost:8000/clarify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...inputs, qa_history: [] })
-      });
-      const data = await res.json();
-      if (data.ready) {
-        await runReview();
-      } else {
-        showQuestion(data.question, data.question_number);
-      }
-    } catch (err) {
-      alert('Error: could not reach server. Make sure uvicorn is running.');
-    } finally {
-      btn.disabled = false;
-      loading.style.display = 'none';
-    }
-  }
-
-  function showQuestion(question, questionNumber) {
-    currentQuestion = question;
-    document.getElementById('step1-card').style.opacity = '0.5';
-    document.getElementById('step2-card').classList.remove('hidden');
-    document.getElementById('question-text').textContent = question;
-    document.getElementById('q-counter').textContent =
-      `Question ${questionNumber} of up to 3`;
-    document.getElementById('progress-fill').style.width =
-      `${(questionNumber - 1) * 33}%`;
-    document.getElementById('answer-input').value = '';
-    document.getElementById('answer-input').focus();
-  }
-
-  async function submitAnswer() {
-    const answer = document.getElementById('answer-input').value.trim();
-    if (!answer) { alert('Please provide an answer.'); return; }
-    qaHistory.push({ question: currentQuestion, answer });
-    const btn = document.getElementById('next-btn');
-    const loading = document.getElementById('loading-2');
-    btn.disabled = true;
-    loading.style.display = 'block';
-    const inputs = getInputs();
-    try {
-      const res = await fetch('http://localhost:8000/clarify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...inputs, qa_history: qaHistory })
-      });
-      const data = await res.json();
-      if (data.ready) {
-        document.getElementById('step2-card').classList.add('hidden');
-        await runReview();
-      } else {
-        showQuestion(data.question, data.question_number);
-      }
-    } catch (err) {
-      alert('Error reaching server.');
-    } finally {
-      btn.disabled = false;
-      loading.style.display = 'none';
-    }
-  }
-
-  async function skipToAnalysis() {
-    document.getElementById('step2-card').classList.add('hidden');
-    await runReview();
-  }
-
-  async function runReview() {
-    document.getElementById('step3-card').style.display = 'block';
-    window.scrollTo(0, document.body.scrollHeight);
-    const inputs = getInputs();
-    try {
-      const res = await fetch('http://localhost:8000/review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...inputs, qa_history: qaHistory })
-      });
-      const data = await res.json();
-      document.getElementById('step3-card').style.display = 'none';
-      showResults(data);
-    } catch (err) {
-      document.getElementById('step3-card').style.display = 'none';
-      alert('Error running review. Check server logs.');
-    }
-  }
-
-  function extractSummary(text, agentType) {
-    if (!text) return 'Summary not available.';
-    const lines = text.split('\n').filter(l => l.trim().length > 20);
-
-    if (agentType === 'competitor') {
-      const whitespace = lines.find(l =>
-        l.toLowerCase().includes('first-mover') ||
-        l.toLowerCase().includes('whitespace'));
-      const diff = lines.find(l =>
-        l.toLowerCase().includes('recommended angle') ||
-        l.toLowerCase().includes('pixel should'));
-      const conf = lines.find(l =>
-        l.toLowerCase().includes('confidence'));
-      return [whitespace, diff, conf]
-        .filter(Boolean).slice(0, 3)
-        .join(' · ') || lines.slice(0, 2).join(' ');
-    }
-
-    if (agentType === 'cs') {
-      const score = lines.find(l =>
-        l.toLowerCase().includes('readiness score') ||
-        l.toLowerCase().includes('/10'));
-      const high = lines.find(l =>
-        l.toLowerCase().includes('high') &&
-        l.toLowerCase().includes('likelihood'));
-      const deflect = lines.find(l =>
-        l.toLowerCase().includes('deflect') ||
-        l.toLowerCase().includes('self-serve'));
-      return [score, high, deflect]
-        .filter(Boolean).slice(0, 3)
-        .join(' · ') || lines.slice(0, 2).join(' ');
-    }
-
-    if (agentType === 'compliance') {
-      const risk = lines.find(l =>
-        l.toLowerCase().includes('compliance risk'));
-      const blocker = lines.find(l =>
-        l.toLowerCase().includes('launch blocker') ||
-        l.toLowerCase().includes('cannot proceed'));
-      const reqs = lines.find(l =>
-        l.toLowerCase().includes('must comply') ||
-        l.toLowerCase().includes('mandatory'));
-      return [risk, blocker, reqs]
-        .filter(Boolean).slice(0, 3)
-        .join(' · ') || lines.slice(0, 2).join(' ');
-    }
-
-    if (agentType === 'spec') {
-      const scope = lines.find(l =>
-        l.toLowerCase().includes('in scope'));
-      const uc = lines.find(l =>
-        l.toLowerCase().includes('use case'));
-      const metric = lines.find(l =>
-        l.toLowerCase().includes('metric') ||
-        l.toLowerCase().includes('kpi'));
-      return [scope, uc, metric]
-        .filter(Boolean).slice(0, 3)
-        .join(' · ') || lines.slice(0, 2).join(' ');
-    }
-
-    return lines.slice(0, 2).join(' ');
-  }
-
-  function extractKeyContent(agentType, data) {
-    const text = data.response || '';
-    if (agentType === 'competitor') {
-      const sections = ['PIXEL STUDIO DIFFERENTIATION', 'RECOMMENDED ANGLE',
-        'WHITESPACE SIGNAL', 'COMPETITORS'];
-      return extractSections(text, sections, 800);
-    }
-    if (agentType === 'cs') {
-      const sections = ['TICKET DEFLECTION', 'WHAT REAL USERS SAY',
-        'OVERALL CS READINESS'];
-      return extractSections(text, sections, 800);
-    }
-    if (agentType === 'compliance') {
-      const sections = ['COMPLIANCE REQUIREMENTS', 'LAUNCH BLOCKERS',
-        'APPLICABLE RBI REGULATIONS'];
-      return extractSections(text, sections, 1000);
-    }
-    if (agentType === 'spec') {
-      const sections = ['FUNCTIONAL USE CASES',
-        'METRICS IMPACT', 'INSTRUMENTATION'];
-      return extractSections(text, sections, 1500);
-    }
-    if (agentType === 'spec-scope') {
-      const sections = ['SCOPE', 'IN SCOPE', 'OUT OF SCOPE'];
-      return extractSections(text, sections, 800);
-    }
-    return text.slice(0, 800);
-  }
-
-  function extractSections(text, sectionNames, maxChars) {
-    let result = '';
-    for (const section of sectionNames) {
-      const idx = text.toUpperCase().indexOf(section.toUpperCase());
-      if (idx !== -1) {
-        result += text.slice(idx, idx + 400) + '\n\n';
-      }
-    }
-    return result.slice(0, maxChars) || text.slice(0, maxChars);
-  }
-
-  function showResults(data) {
-    prdData = data;
-    const container = document.getElementById('results-container');
-    container.style.display = 'block';
-
-    const comp = data.competitor_analysis;
-    const cs = data.cs_analysis;
-    const compliance = data.compliance_analysis;
-    const spec = data.spec_analysis;
-
-    // Competitor tab
-    if (comp) {
-      addTags('tags-competitor', [
-        { text: 'Competitor', cls: 'tag-competitor' },
-        data.rbi_triggered ? { text: 'RBI', cls: 'tag-rbi' } : null
-      ]);
-      document.getElementById('meta-competitor').textContent =
-        `${data.sources_searched || 0} sources · ${qaHistory.length} clarifying questions · ${new Date().toLocaleTimeString()}`;
-      document.getElementById('summary-text-competitor').textContent =
-        extractSummary(comp.response, 'competitor');
-      document.getElementById('output-competitor').textContent = comp.response;
-      if (comp.options?.choices) {
-        renderOptions('options-competitor', comp.options, 'differentiation');
-      }
-      document.getElementById('tab-badge-competitor').textContent = 'Medium';
-    }
-
-    // CS tab
-    if (cs) {
-      addTags('tags-cs', [{ text: 'CS Impact', cls: 'tag-cs' }]);
-      document.getElementById('meta-cs').textContent =
-        `PRD: ${cs.prd_used || 'loaded'} · ${new Date().toLocaleTimeString()}`;
-      document.getElementById('summary-text-cs').textContent =
-        extractSummary(cs.response, 'cs');
-      document.getElementById('output-cs').textContent = cs.response;
-      document.getElementById('tab-badge-cs').textContent = 'Ready';
-    }
-
-    // Compliance tab
-    if (compliance) {
-      addTags('tags-compliance', [
-        { text: 'Compliance', cls: 'tag-rbi' },
-        compliance.rbi_sections_found ?
-          { text: 'RBI found', cls: 'tag-saved' } :
-          { text: 'Legal review needed', cls: 'tag-rbi' }
-      ]);
-      document.getElementById('meta-compliance').textContent =
-        `RBI docs analysed · ${new Date().toLocaleTimeString()}`;
-      document.getElementById('summary-text-compliance').textContent =
-        extractSummary(compliance.response, 'compliance');
-      document.getElementById('output-compliance').textContent =
-        compliance.response;
-      document.getElementById('tab-badge-compliance').textContent = 'Review';
-    }
-
-    // Spec tab
-    if (spec) {
-      addTags('tags-spec', [
-        { text: 'Spec Agent', cls: 'tag-cs' },
-        { text: spec.sop_used?.replace('SOP: ', '') || 'SOP loaded',
-          cls: 'tag-saved' }
-      ]);
-      document.getElementById('meta-spec').textContent =
-        `Use cases + AC + metrics · ${new Date().toLocaleTimeString()}`;
-      document.getElementById('summary-text-spec').textContent =
-        extractSummary(spec.response, 'spec');
-      document.getElementById('output-spec').textContent = spec.response;
-      document.getElementById('tab-badge-spec').textContent = 'Ready';
-    }
-
-    // Bottom bar
-    const bottomBar = document.getElementById('bottom-bar');
-    bottomBar.style.display = 'flex';
-    updateBottomStatus();
-
-    window.scrollTo(0, document.getElementById('results-container').offsetTop);
-  }
-
-  function addTags(containerId, tags) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
-    tags.filter(Boolean).forEach(tag => {
-      const span = document.createElement('span');
-      span.className = `tag ${tag.cls}`;
-      span.textContent = tag.text;
-      container.appendChild(span);
-    });
-  }
-
-  function renderOptions(containerId, optionsData, sectionKey) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    container.innerHTML = '';
-    const heading = document.createElement('div');
-    heading.className = 'options-heading';
-    heading.textContent = 'Pick your differentiation angle:';
-    container.appendChild(heading);
-    const grid = document.createElement('div');
-    grid.className = 'options-grid';
-    optionsData.choices.forEach(choice => {
-      const card = document.createElement('div');
-      card.className = `option-card ${choice.recommended ? 'recommended' : ''}`;
-      card.id = `option-${sectionKey}-${choice.id}`;
-      card.innerHTML = `
-        ${choice.recommended ? '<div class="rec-badge">Recommended</div>' : ''}
-        <div class="option-title">${choice.title}</div>
-        <div class="option-summary">${choice.summary}</div>
-        <div class="option-meta">
-          <span class="option-tag">${choice.complexity} complexity</span>
-          ${choice.ticket_reduction ?
-            `<span class="option-tag">${choice.ticket_reduction} ticket reduction</span>` : ''}
         </div>
-        <div class="option-rationale">${choice.rationale}</div>
-      `;
-      card.onclick = () => {
-        document.querySelectorAll(`[id^="option-${sectionKey}"]`)
-          .forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-      };
-      grid.appendChild(card);
-    });
-    container.appendChild(grid);
-  }
+      </div>
 
-  function useInPRD(agentType) {
-    const content = extractKeyContent(agentType, prdData[agentType + '_analysis']);
-    selectedForPRD[agentType] = content;
+      <button class="start-btn" id="start-btn" onclick="startClarification()">
+        Start Analysis →
+      </button>
+      <p class="loading-text" id="loading-1">Getting first question...</p>
+    </div>
 
-    // For spec agent extract scope separately for PRD form section 5
-    if (agentType === 'spec') {
-      const specResponse = prdData['spec_analysis']?.response || '';
-      const scopeContent = extractSections(
-        specResponse,
-        ['SCOPE', 'IN SCOPE', 'OUT OF SCOPE'],
-        800
+    <!-- Clarifying questions -->
+    <div id="step2-card" class="hidden">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="question-card">
+        <div class="q-counter" id="q-counter">Question 1 of up to 3</div>
+        <div class="question-text" id="question-text"></div>
+        <textarea id="answer-input" rows="3" placeholder="Your answer..."></textarea>
+        <div class="btn-row">
+          <button class="btn-primary" id="next-btn" onclick="submitAnswer()">Next →</button>
+          <button class="btn-secondary" onclick="skipToAnalysis()">Skip to analysis</button>
+        </div>
+        <p class="loading-text" id="loading-2">Thinking...</p>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-card" id="step3-card">
+      <div class="section-label">Running analysis</div>
+      <p style="font-size:13px;color:#64748b;">Agents running in parallel — 20-40 seconds</p>
+      <div class="agents-running" id="agents-running-pills"></div>
+    </div>
+
+    <!-- Results tabs -->
+    <div class="results-container" id="results-container">
+      <div class="tab-bar" id="tab-bar"></div>
+      <div id="tab-panels"></div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="bottom-bar" id="bottom-bar">
+      <div class="bottom-status" id="bottom-status">
+        Click "Use in PRD" on any tab to add to your PRD
+      </div>
+      <button class="bottom-prd-btn" onclick="openPRDGenerator()">
+        Open PRD Generator →
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    let qaHistory = [];
+    let currentQuestion = '';
+    let selectedForPRD = {};
+    let analysisData = {};
+    let usedAgents = new Set();
+
+    const AGENT_CONFIG = {
+      competitor: { label: '🔍 Competitor', desc: 'Competitive intelligence' },
+      cs:         { label: '💬 CS Impact',  desc: 'CS readiness' },
+      compliance: { label: '⚖️ Compliance', desc: 'RBI analysis' },
+      spec:       { label: '📋 Spec',        desc: 'Use cases + metrics' }
+    };
+
+    function getSelectedAgents() {
+      return Object.keys(AGENT_CONFIG).filter(a =>
+        document.getElementById('cb-' + a)?.checked
       );
-      if (scopeContent) {
-        selectedForPRD['spec_scope'] = scopeContent;
+    }
+
+    function toggleAgent(id) {
+      const lbl = document.getElementById('lbl-' + id);
+      const cb = document.getElementById('cb-' + id);
+      if (!lbl || !cb) return;
+      lbl.classList.toggle('checked', cb.checked);
+    }
+
+    let allSelected = true;
+    function toggleAllAgents() {
+      allSelected = !allSelected;
+      Object.keys(AGENT_CONFIG).forEach(a => {
+        const cb = document.getElementById('cb-' + a);
+        const lbl = document.getElementById('lbl-' + a);
+        if (cb && lbl) {
+          cb.checked = allSelected;
+          lbl.classList.toggle('checked', allSelected);
+        }
+      });
+    }
+
+    // Wire checkboxes
+    Object.keys(AGENT_CONFIG).forEach(a => {
+      const cb = document.getElementById('cb-' + a);
+      if (cb) cb.addEventListener('change', () => toggleAgent(a));
+      const lbl = document.getElementById('lbl-' + a);
+      if (lbl) lbl.addEventListener('click', () => {
+        setTimeout(() => toggleAgent(a), 0);
+      });
+    });
+
+    function getInputs() {
+      return {
+        feature_name: document.getElementById('feature-name').value.trim(),
+        feature_description: document.getElementById('feature-input').value.trim(),
+        competitors: document.getElementById('competitors-input').value.trim()
+      };
+    }
+
+    function validateStep1() {
+      const { feature_name, feature_description } = getInputs();
+      if (!feature_name || !feature_description) {
+        alert('Please fill in both feature name and description.');
+        return false;
+      }
+      if (getSelectedAgents().length === 0) {
+        alert('Please select at least one agent to run.');
+        return false;
+      }
+      return true;
+    }
+
+    async function startClarification() {
+      if (!validateStep1()) return;
+      const btn = document.getElementById('start-btn');
+      const loading = document.getElementById('loading-1');
+      btn.disabled = true;
+      loading.style.display = 'block';
+      const inputs = getInputs();
+      try {
+        const res = await fetch('http://localhost:8000/clarify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...inputs, qa_history: [] })
+        });
+        const data = await res.json();
+        if (data.ready) {
+          await runReview();
+        } else {
+          showQuestion(data.question, data.question_number);
+        }
+      } catch (err) {
+        alert('Error: could not reach server. Make sure uvicorn is running.');
+      } finally {
+        btn.disabled = false;
+        loading.style.display = 'none';
       }
     }
 
-    localStorage.setItem('prd_studio_selections',
-      JSON.stringify(selectedForPRD));
-    localStorage.setItem('prd_studio_feature',
-      JSON.stringify(getInputs()));
-
-    const btn = document.getElementById('use-btn-' + agentType);
-    btn.textContent = '✓ Added to PRD';
-    btn.classList.add('used');
-
-    updateBottomStatus();
-  }
-
-  function updateBottomStatus() {
-    const count = Object.keys(selectedForPRD).length;
-    const status = document.getElementById('bottom-status');
-    if (count === 0) {
-      status.textContent = 'Click "Use in PRD" on any tab to add content to your PRD';
-    } else {
-      const names = Object.keys(selectedForPRD)
-        .map(k => k.charAt(0).toUpperCase() + k.slice(1));
-      status.textContent = `${names.join(', ')} added to PRD Generator`;
+    function showQuestion(question, questionNumber) {
+      currentQuestion = question;
+      document.getElementById('step1-card').style.opacity = '0.6';
+      document.getElementById('step2-card').classList.remove('hidden');
+      document.getElementById('question-text').textContent = question;
+      document.getElementById('q-counter').textContent =
+        `Question ${questionNumber} of up to 3`;
+      document.getElementById('progress-fill').style.width =
+        `${(questionNumber - 1) * 33}%`;
+      document.getElementById('answer-input').value = '';
+      document.getElementById('answer-input').focus();
     }
-  }
 
-  function openPRDGenerator() {
-    localStorage.setItem('prd_studio_selections',
-      JSON.stringify(selectedForPRD));
-    localStorage.setItem('prd_studio_feature',
-      JSON.stringify(getInputs()));
-    window.open('/ui/prd-form.html', '_blank');
-  }
-</script>
+    async function submitAnswer() {
+      const answer = document.getElementById('answer-input').value.trim();
+      if (!answer) { alert('Please provide an answer.'); return; }
+      qaHistory.push({ question: currentQuestion, answer });
+      const btn = document.getElementById('next-btn');
+      const loading = document.getElementById('loading-2');
+      btn.disabled = true;
+      loading.style.display = 'block';
+      const inputs = getInputs();
+      try {
+        const res = await fetch('http://localhost:8000/clarify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...inputs, qa_history: qaHistory })
+        });
+        const data = await res.json();
+        if (data.ready) {
+          document.getElementById('step2-card').classList.add('hidden');
+          await runReview();
+        } else {
+          showQuestion(data.question, data.question_number);
+        }
+      } catch (err) {
+        alert('Error reaching server.');
+      } finally {
+        btn.disabled = false;
+        loading.style.display = 'none';
+      }
+    }
+
+    async function skipToAnalysis() {
+      document.getElementById('step2-card').classList.add('hidden');
+      await runReview();
+    }
+
+    async function runReview() {
+      const selectedAgents = getSelectedAgents();
+      const step3 = document.getElementById('step3-card');
+      step3.style.display = 'block';
+
+      // Show pills for selected agents only
+      const pillsContainer = document.getElementById('agents-running-pills');
+      pillsContainer.innerHTML = selectedAgents.map(a =>
+        `<div class="agent-pill-running" id="pill-${a}">${AGENT_CONFIG[a].label}</div>`
+      ).join('');
+
+      window.scrollTo(0, document.body.scrollHeight);
+      const inputs = getInputs();
+
+      try {
+        const res = await fetch('http://localhost:8000/review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...inputs,
+            qa_history: qaHistory,
+            selected_agents: selectedAgents
+          })
+        });
+        const data = await res.json();
+        step3.style.display = 'none';
+        showResults(data);
+      } catch (err) {
+        step3.style.display = 'none';
+        alert('Error running analysis. Check server logs.');
+      }
+    }
+
+    function showResults(data) {
+      analysisData = data;
+      const container = document.getElementById('results-container');
+      const tabBar = document.getElementById('tab-bar');
+      const tabPanels = document.getElementById('tab-panels');
+      container.style.display = 'block';
+      tabBar.innerHTML = '';
+      tabPanels.innerHTML = '';
+
+      const agentMap = {
+        competitor: data.competitor_analysis,
+        cs: data.cs_analysis,
+        compliance: data.compliance_analysis,
+        spec: data.spec_analysis
+      };
+
+      const badgeMap = {
+        competitor: { text: 'Ready', cls: 'badge-ok' },
+        cs: { text: 'Ready', cls: 'badge-ok' },
+        compliance: { text: 'Review', cls: 'badge-high' },
+        spec: { text: 'Ready', cls: 'badge-ok' }
+      };
+
+      let firstTab = null;
+      Object.entries(agentMap).forEach(([key, agentData]) => {
+        if (!agentData) return;
+        if (!firstTab) firstTab = key;
+
+        const badge = badgeMap[key];
+        const tab = document.createElement('button');
+        tab.className = 'tab-btn' + (key === firstTab ? ' active' : '');
+        tab.id = `tab-${key}`;
+        tab.innerHTML = `${AGENT_CONFIG[key].label} <span class="risk-badge ${badge.cls}">${badge.text}</span>`;
+        tab.onclick = () => switchTab(key);
+        tabBar.appendChild(tab);
+
+        const panel = document.createElement('div');
+        panel.className = 'tab-panel' + (key === firstTab ? ' active' : '');
+        panel.id = `panel-${key}`;
+        panel.innerHTML = buildPanel(key, agentData, data);
+        tabPanels.appendChild(panel);
+      });
+
+      document.getElementById('nav-prd-btn').classList.add('visible');
+      document.getElementById('bottom-bar').classList.add('visible');
+      window.scrollTo(0, container.offsetTop - 70);
+    }
+
+    function buildPanel(key, agentData, fullData) {
+      const summary = agentData.summary || [];
+      const meta = buildMeta(key, agentData, fullData);
+
+      let summaryHtml = '';
+      if (summary.length > 0) {
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-title">3 key takeaways</div>
+            <div class="summary-items">
+              ${summary.map(b => `
+                <div class="summary-item">
+                  <div class="summary-dot"></div>
+                  <span>${b}</span>
+                </div>`).join('')}
+            </div>
+          </div>`;
+      }
+
+      let optionsHtml = '';
+      if (key === 'competitor' && agentData.options?.choices) {
+        optionsHtml = `
+          <div class="options-heading">Pick your differentiation angle</div>
+          <div class="options-grid">
+            ${agentData.options.choices.map(choice => `
+              <div class="option-card ${choice.recommended ? 'recommended' : ''}"
+                id="opt-${choice.id}"
+                onclick="selectOption('differentiation', ${JSON.stringify(choice).replace(/"/g, '&quot;')}, this)">
+                ${choice.recommended ? '<div class="rec-badge">Recommended</div>' : ''}
+                <div class="option-title">${choice.title}</div>
+                <div class="option-summary">${choice.summary}</div>
+                <div class="option-meta">
+                  <span class="option-tag">${choice.complexity} complexity</span>
+                </div>
+                <div class="option-rationale">${choice.rationale}</div>
+              </div>`).join('')}
+          </div>`;
+      }
+
+      return `
+        <div class="agent-meta">${meta}</div>
+        ${summaryHtml}
+        <div class="action-bar">
+          <span class="action-bar-text">Use this analysis in your PRD</span>
+          <div class="action-btns">
+            <button class="copy-btn" onclick="copyOutput('${key}')">Copy ↗</button>
+            <button class="use-btn" id="use-btn-${key}" onclick="useInPRD('${key}')">
+              Use in PRD →
+            </button>
+          </div>
+        </div>
+        <div class="agent-output" id="output-${key}">${agentData.response || ''}</div>
+        ${optionsHtml}`;
+    }
+
+    function buildMeta(key, agentData, fullData) {
+      if (key === 'competitor') {
+        return `${fullData.sources_searched || 0} sources · ${qaHistory.length} clarifying questions · ${new Date().toLocaleTimeString()}`;
+      }
+      if (key === 'cs') {
+        return `PRD: ${(agentData.prd_used || 'loaded').replace('PRD: ', '')} · ${new Date().toLocaleTimeString()}`;
+      }
+      if (key === 'compliance') {
+        const found = agentData.rbi_sections_found ? 'RBI sections found' : 'Legal review needed';
+        return `${found} · ${new Date().toLocaleTimeString()}`;
+      }
+      if (key === 'spec') {
+        return `${(agentData.sop_used || 'SOP loaded').replace('SOP: ', '')} · ${new Date().toLocaleTimeString()}`;
+      }
+      return new Date().toLocaleTimeString();
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + tab)?.classList.add('active');
+      document.getElementById('panel-' + tab)?.classList.add('active');
+    }
+
+    function selectOption(sectionKey, choice, cardEl) {
+      document.querySelectorAll(`[id^="opt-"]`).forEach(c => c.classList.remove('selected'));
+      cardEl.classList.add('selected');
+    }
+
+    function copyOutput(key) {
+      const el = document.getElementById('output-' + key);
+      if (!el) return;
+      navigator.clipboard.writeText(el.textContent).then(() => {
+        const btn = event.target;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy ↗', 2000);
+      });
+    }
+
+    function extractKeyContent(agentType, agentData) {
+      const text = agentData?.response || '';
+      const sections = {
+        competitor: ['PIXEL STUDIO DIFFERENTIATION', 'RECOMMENDED ANGLE', 'WHITESPACE SIGNAL', 'COMPETITORS'],
+        cs: ['TICKET DEFLECTION', 'WHAT REAL USERS SAY', 'OVERALL CS READINESS', 'FAQ COVERAGE'],
+        compliance: ['COMPLIANCE REQUIREMENTS', 'LAUNCH BLOCKERS', 'APPLICABLE RBI REGULATIONS'],
+        spec: ['FUNCTIONAL USE CASES', 'METRICS IMPACT', 'INSTRUMENTATION']
+      };
+      return extractSections(text, sections[agentType] || [], 1200);
+    }
+
+    function extractScopeContent(agentData) {
+      return extractSections(agentData?.response || '', ['SCOPE', 'IN SCOPE', 'OUT OF SCOPE'], 800);
+    }
+
+    function extractSections(text, sectionNames, maxChars) {
+      let result = '';
+      for (const section of sectionNames) {
+        const idx = text.toUpperCase().indexOf(section.toUpperCase());
+        if (idx !== -1) result += text.slice(idx, idx + 500) + '\n\n';
+      }
+      return result.slice(0, maxChars) || text.slice(0, maxChars);
+    }
+
+    function useInPRD(agentType) {
+      const agentData = analysisData[agentType + '_analysis'];
+      const content = extractKeyContent(agentType, agentData);
+      selectedForPRD[agentType] = content;
+
+      if (agentType === 'spec') {
+        selectedForPRD['spec_scope'] = extractScopeContent(agentData);
+      }
+
+      localStorage.setItem('prd_studio_selections', JSON.stringify(selectedForPRD));
+      localStorage.setItem('prd_studio_feature', JSON.stringify(getInputs()));
+
+      const btn = document.getElementById('use-btn-' + agentType);
+      if (btn) { btn.textContent = '✓ Added'; btn.classList.add('used'); }
+
+      const tab = document.getElementById('tab-' + agentType);
+      if (tab) tab.classList.add('done');
+
+      usedAgents.add(agentType);
+      updateBottomStatus();
+    }
+
+    function updateBottomStatus() {
+      const count = usedAgents.size;
+      const status = document.getElementById('bottom-status');
+      if (count === 0) {
+        status.innerHTML = 'Click "Use in PRD" on any tab to add to your PRD';
+      } else {
+        const names = [...usedAgents].map(k => AGENT_CONFIG[k].label);
+        status.innerHTML = `<strong>${names.join(', ')}</strong> added to PRD Generator`;
+      }
+    }
+
+    function openPRDGenerator() {
+      localStorage.setItem('prd_studio_selections', JSON.stringify(selectedForPRD));
+      localStorage.setItem('prd_studio_feature', JSON.stringify(getInputs()));
+      window.open('/ui/prd-form.html', '_blank');
+    }
+  </script>
 </body>
 </html>
