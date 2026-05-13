@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="icon" type="image/svg+xml" href="/ui/favicon.svg">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PRD Agent Studio</title>
@@ -133,10 +134,23 @@
       color: #64748b;
       margin-bottom: 10px;
     }
-    .agent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: stretch; }
+    
+    .agent-grid {
+      display: flex;
+      flex-wrap: wrap;
+      row-gap: 8px;
+      column-gap: 8px;
+    }
+    .agent-grid .agent-checkbox {
+      flex: 1 1 calc(50% - 4px);
+      min-width: calc(50% - 4px);
+      height: 72px !important;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
 
     .agent-checkbox {
-      display: flex;
+      display: flex !important;
       align-items: center;
       gap: 10px;
       padding: 10px 14px;
@@ -146,8 +160,17 @@
       background: white;
       transition: all 0.15s;
       user-select: none;
-      min-height: 60px;
+      height: 72px;
     }
+
+    label.agent-checkbox {
+      display: flex !important;
+      height: 72px !important;
+      max-height: 72px !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+    }
+    
     .agent-checkbox:hover { border-color: #0d9488; background: #f0fdfa; }
     .agent-checkbox.checked { border-color: #0d9488; background: #f0fdfa; }
 
@@ -826,12 +849,30 @@
         spec: data.spec_analysis
       };
 
-      const badgeMap = {
-        competitor: { text: 'Ready', cls: 'badge-ok' },
-        cs: { text: 'Ready', cls: 'badge-ok' },
-        compliance: { text: 'Review', cls: 'badge-high' },
-        spec: { text: 'Ready', cls: 'badge-ok' }
-      };
+      function getConfidenceBadge(agentData) {
+      if (!agentData) return { text: 'Ready', cls: 'badge-ok' };
+      const summary = agentData.summary || [];
+      const lastBullet = summary[summary.length - 1] || '';
+      if (lastBullet.toLowerCase().includes('high confidence')) {
+        return { text: 'High', cls: 'badge-ok' };
+      } else if (lastBullet.toLowerCase().includes('low confidence')) {
+        return { text: 'Low', cls: 'badge-high' };
+      } else if (lastBullet.toLowerCase().includes('medium confidence') ||
+                 lastBullet.toLowerCase().includes('medium risk')) {
+        return { text: 'Medium', cls: 'badge-med' };
+      } else if (lastBullet.toLowerCase().includes('high risk') ||
+                 lastBullet.toLowerCase().includes('review')) {
+        return { text: 'Review', cls: 'badge-high' };
+      }
+      return { text: 'Ready', cls: 'badge-ok' };
+    }
+
+    const badgeMap = {
+      competitor: getConfidenceBadge(data.competitor_analysis),
+      cs: getConfidenceBadge(data.cs_analysis),
+      compliance: getConfidenceBadge(data.compliance_analysis),
+      spec: getConfidenceBadge(data.spec_analysis)
+    };
 
       let firstTab = null;
       Object.entries(agentMap).forEach(([key, agentData]) => {
