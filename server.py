@@ -619,6 +619,7 @@ def cs_agent(input: CSInput):
 
     # Load relevant PRD — only use if genuinely relevant
     prd_context_raw = load_prd_context(input.feature_name)
+    sop_context = load_relevant_sop(input.feature_name)
     
     # Check if the PRD loaded is actually relevant to this feature
     feature_keywords = [w.lower() for w in input.feature_name.split()
@@ -685,6 +686,9 @@ FEATURE DESCRIPTION: {input.feature_description}
 
 PRD CONTENT:
 {prd_context}
+
+OPS SOP CONTEXT:
+{sop_context}
 
 {rbi_context}
 
