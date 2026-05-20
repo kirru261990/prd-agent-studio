@@ -655,6 +655,7 @@
   </div>
 
   <script>
+    const apiBase = window.location.origin;
     let qaHistory = [];
     let currentQuestion = '';
     let selectedForPRD = {};
@@ -733,7 +734,7 @@
       loading.style.display = 'block';
       const inputs = getInputs();
       try {
-        const res = await fetch('http://localhost:8000/clarify', {
+        const res = await fetch(apiBase + '/clarify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...inputs, qa_history: [] })
@@ -775,7 +776,7 @@
       loading.style.display = 'block';
       const inputs = getInputs();
       try {
-        const res = await fetch('http://localhost:8000/clarify', {
+        const res = await fetch(apiBase + '/clarify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...inputs, qa_history: qaHistory })
@@ -815,7 +816,7 @@
       const inputs = getInputs();
 
       try {
-        const res = await fetch('http://localhost:8000/review', {
+        const res = await fetch(apiBase + '/review', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

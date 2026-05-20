@@ -363,6 +363,7 @@
 </div>
 
 <script>
+  const apiBase = window.location.origin;
   // Load pre-filled content from localStorage on page open
   window.onload = function() {
     const raw = localStorage.getItem('prd_studio_selections');
@@ -406,7 +407,7 @@
     status.textContent = 'Generating PRD... this takes 20-30 seconds.';
 
     try {
-      const res = await fetch('http://localhost:8000/generate-prd-from-form', {
+      const res = await fetch(apiBase + `/generate-prd-from-form`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(fields)
@@ -447,7 +448,7 @@
     btn.textContent = 'Generating Word doc...';
 
     try {
-      const res = await fetch('http://localhost:8000/download-prd-docx', {
+      const res = await fetch(apiBase + `/download-prd-docx`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prd_text: window.generatedPRD })
